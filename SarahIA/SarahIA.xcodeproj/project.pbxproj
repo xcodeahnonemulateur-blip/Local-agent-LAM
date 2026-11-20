@@ -1,0 +1,869 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A1B2C3D40001000100000001 /* SarahIAApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000001 /* SarahIAApp.swift */; };
+		A1B2C3D40001000100000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000002 /* ContentView.swift */; };
+		A1B2C3D40001000100000003 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000003 /* Message.swift */; };
+		A1B2C3D40001000100000004 /* AIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000004 /* AIService.swift */; };
+		A1B2C3D40001000100000005 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000005 /* NotificationService.swift */; };
+		A1B2C3D40001000100000006 /* ChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000006 /* ChatViewModel.swift */; };
+		A1B2C3D40001000100000007 /* ChatBubbleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000007 /* ChatBubbleView.swift */; };
+		A1B2C3D40001000100000009 /* TypingIndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000009 /* TypingIndicatorView.swift */; };
+		A1B2C3D4000100010000000B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000200010000000B /* Assets.xcassets */; };
+		A1B2C3D4000100010000000D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000200010000000D /* LaunchScreen.storyboard */; };
+		A1B2C3D40001000100000010 /* StorageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000010 /* StorageService.swift */; };
+		A1B2C3D40001000100000011 /* AudioEngineManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000011 /* AudioEngineManager.swift */; };
+		A1B2C3D40001000100000012 /* WhisperService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000012 /* WhisperService.swift */; };
+		A1B2C3D40001000100000013 /* TTSService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000013 /* TTSService.swift */; };
+		A1B2C3D40001000100000017 /* HapticService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000017 /* HapticService.swift */; };
+		A1B2C3D40001000100000018 /* MemoryVaultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000018 /* MemoryVaultView.swift */; };
+		A1B2C3D40001000100000019 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000019 /* SettingsView.swift */; };
+		A1B2C3D4000100010000001E /* LocalNeuralIntelligenceEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000200010000001E /* LocalNeuralIntelligenceEngine.swift */; };
+		A1B2C3D4000100010000001F /* TranslationEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000200010000001F /* TranslationEngine.swift */; };
+		A1B2C3D40001000100000020 /* ModelDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000020 /* ModelDownloader.swift */; };
+		A1B2C3D40001000100000021 /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000021 /* NetworkMonitor.swift */; };
+		A1B2C3D40001000100000022 /* LocalVisionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000022 /* LocalVisionEngine.swift */; };
+		A1B2C3D40001000100000023 /* SemanticMemoryIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000023 /* SemanticMemoryIndex.swift */; };
+		A1B2C3D40001000100000024 /* DeviceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000024 /* DeviceController.swift */; };
+		A1B2C3D40001000100000026 /* LocalScriptSandbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000026 /* LocalScriptSandbox.swift */; };
+		A1B2C3D40001000100000027 /* ClipboardCompanion.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000027 /* ClipboardCompanion.swift */; };
+		A1B2C3D40001000100000028 /* WakeWordDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000028 /* WakeWordDetector.swift */; };
+		A1B2C3D40001000100000029 /* BackTapGestureDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000029 /* BackTapGestureDetector.swift */; };
+		A1B2C3D40001000100000030 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000030 /* SidebarView.swift */; };
+		A1B2C3D40001000100000031 /* ChatScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000031 /* ChatScreenView.swift */; };
+		A1B2C3D40001000100000032 /* Conversation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000032 /* Conversation.swift */; };
+		A1B2C3D40001000100000034 /* AppleSpeechRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000034 /* AppleSpeechRecognizer.swift */; };
+		A1B2C3D40001000100000035 /* AudioSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000035 /* AudioSessionManager.swift */; };
+		A1B2C3D40001000100000036 /* SpeechManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000036 /* SpeechManager.swift */; };
+		A1B2C3D40001000100000037 /* MessageList.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000037 /* MessageList.swift */; };
+		A1B2C3D40001000100000038 /* MessageBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000038 /* MessageBar.swift */; };
+		A1B2C3D40001000100000039 /* KeyboardObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000039 /* KeyboardObserver.swift */; };
+		A1B2C3D40001000100000044 /* WebSearchService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000044 /* WebSearchService.swift */; };
+		A1B2C3D40001000100000045 /* MediaStreamingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000045 /* MediaStreamingService.swift */; };
+		A1B2C3D40001000100000046 /* SarahBrainEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000046 /* SarahBrainEngine.swift */; };
+		A1B2C3D4000100010000004C /* WeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000200010000004C /* WeatherService.swift */; };
+		A1B2C3D4000100010000004D /* RedAlertService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000200010000004D /* RedAlertService.swift */; };
+		A1B2C3D4000100010000004E /* NewsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000200010000004E /* NewsService.swift */; };
+		A1B2C3D4000100010000004F /* YouTubeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000200010000004F /* YouTubeService.swift */; };
+		A1B2C3D40001000100000060 /* YouTubePlayerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000060 /* YouTubePlayerViewController.swift */; };
+		A1B2C3D40001000100000062 /* TTSManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000062 /* TTSManager.swift */; };
+		A1B2C3D40001000100000065 /* FlashlightManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000065 /* FlashlightManager.swift */; };
+		A1B2C3D40001000100000066 /* BatteryMonitorManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000066 /* BatteryMonitorManager.swift */; };
+		A1B2C3D40001000100000068 /* SarahVoiceWaveSquareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000068 /* SarahVoiceWaveSquareView.swift */; };
+		A1B2C3D40001000100000069 /* IsraelCityDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000069 /* IsraelCityDatabase.swift */; };
+		A1B2C3D4000100010000006A /* IsraelAlertService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000200010000006A /* IsraelAlertService.swift */; };
+		A1B2C3D4000100010000006B /* AlertCardRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000200010000006B /* AlertCardRenderer.swift */; };
+		A1B2C3D40001000100000070 /* AgentType.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000070 /* AgentType.swift */; };
+		A1B2C3D40001000100000071 /* TomKnowledgeBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000071 /* TomKnowledgeBase.swift */; };
+		A1B2C3D40001000100000072 /* YohanLexiconEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000072 /* YohanLexiconEngine.swift */; };
+		A1B2C3D40001000100000073 /* VAICodeEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000073 /* VAICodeEngine.swift */; };
+		A1B2C3D40001000100000074 /* MultiAgentCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000074 /* MultiAgentCoordinator.swift */; };
+		A1B2C3D40001000100000075 /* MultiAgentVoiceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000075 /* MultiAgentVoiceManager.swift */; };
+		A1B2C3D40001000100000076 /* MultiAgentOrbView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000076 /* MultiAgentOrbView.swift */; };
+		A1B2C3D40001000100000077 /* VoiceOrbModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000077 /* VoiceOrbModalView.swift */; };
+		A1B2C3D40001000100000078 /* VAICodingStudioView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000078 /* VAICodingStudioView.swift */; };
+		A1B2C3D40001000100000079 /* CommonStyles.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000079 /* CommonStyles.swift */; };
+		A1B2C3D40001000100000080 /* DeviceCapabilityProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000080 /* DeviceCapabilityProfile.swift */; };
+		A1B2C3D40001000100000081 /* DeviceCapabilityDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000081 /* DeviceCapabilityDetector.swift */; };
+		A1B2C3D40001000100000082 /* ModelProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000082 /* ModelProfile.swift */; };
+		A1B2C3D40001000100000083 /* ModelSelectionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000083 /* ModelSelectionEngine.swift */; };
+		A1B2C3D40001000100000084 /* EmbeddedModelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000084 /* EmbeddedModelManager.swift */; };
+		A1B2C3D40001000100000085 /* AIResourceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000085 /* AIResourceManager.swift */; };
+		A1B2C3D40001000100000086 /* AIStreamingBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000086 /* AIStreamingBuffer.swift */; };
+		A1B2C3D40001000100000087 /* AIProgressiveScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000087 /* AIProgressiveScheduler.swift */; };
+		A1B2C3D40001000100000088 /* HardwareDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000088 /* HardwareDetector.swift */; };
+		A1B2C3D4000100010000008A /* AdvancedVisionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000200010000008A /* AdvancedVisionEngine.swift */; };
+		A1B2C3D4000100010000008B /* OpenSourceMusicEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000200010000008B /* OpenSourceMusicEngine.swift */; };
+		A1B2C3D4000100010000008C /* OpenSourceImageGenerationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000200010000008C /* OpenSourceImageGenerationService.swift */; };
+		A1B2C3D4000100010000008D /* MultimodalMediaCardViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000200010000008D /* MultimodalMediaCardViews.swift */; };
+		A1B2C3D40001000100000090 /* LiveTranslationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000090 /* LiveTranslationModels.swift */; };
+		A1B2C3D40001000100000092 /* LiveSpeechTranslationPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000092 /* LiveSpeechTranslationPipeline.swift */; };
+		A1B2C3D40001000100000093 /* LiveTranslationSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000093 /* LiveTranslationSession.swift */; };
+		A1B2C3D40001000100000094 /* LiveTranslationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000094 /* LiveTranslationView.swift */; };
+		A1B2C3D40001000100000096 /* OfflineTranslationAssetLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000096 /* OfflineTranslationAssetLoader.swift */; };
+		A1B2C3D4000100010000009B /* SarahDesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000200010000009B /* SarahDesignSystem.swift */; };
+		A1B2C3D4000100010000009C /* SarahActionCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000200010000009C /* SarahActionCoordinator.swift */; };
+		A1B2C3D4000100010000009D /* VirtualPhoneManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000200010000009D /* VirtualPhoneManager.swift */; };
+		A1B2C3D4000100010000009E /* VirtualPhoneViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000200010000009E /* VirtualPhoneViewController.swift */; };
+		A1B2C3D4000100010000009F /* DevCodeInjector.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000200010000009F /* DevCodeInjector.swift */; };
+		A1B2C3D400010001000000A0 /* SessionTimeoutManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D400020001000000A0 /* SessionTimeoutManager.swift */; };
+		A1B2C3D400010001000000A1 /* RealtimeAudioWaveformExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D400020001000000A1 /* RealtimeAudioWaveformExtractor.swift */; };
+		A1B2C3D400010001000000A2 /* BackgroundModelDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D400020001000000A2 /* BackgroundModelDownloader.swift */; };
+		A1B2C3D400010001000000A3 /* SQLiteChatDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D400020001000000A3 /* SQLiteChatDatabase.swift */; };
+		A1B2C3D400010001000000A4 /* SarahLocalImageGenEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D400020001000000A4 /* SarahLocalImageGenEngine.swift */; };
+		A1B2C3D400010001000000B0 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = A1B2C3D4000B000100000001 /* ZIPFoundation */; };
+		A1B2C3D400010001000000B1 /* SarahLocalMusicGenEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D400020001000000B1 /* SarahLocalMusicGenEngine.swift */; };
+		A1B2C3D400010001000000B3 /* StableDiffusion in Frameworks */ = {isa = PBXBuildFile; productRef = A1B2C3D4000B000100000003 /* StableDiffusion */; };
+
+D10000000000000000000001 /* SarahiaWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D10000000000000000000004 /* SarahiaWatchApp.swift */; };
+D10000000000000000000012 /* Watch Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D10000000000000000000013 /* Assets.xcassets */; };
+D10000000000000000000002 /* SarahiaWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = D10000000000000000000005 /* SarahiaWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+D10000000000000000000003 /* SarahWatchBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = D10000000000000000000006 /* SarahWatchBridge.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+D10000000000000000000009 /* Embed Watch Content */ = {isa = PBXCopyFilesBuildPhase; buildActionMask = 2147483647; dstPath = "$(CONTENTS_FOLDER_PATH)/Watch"; dstSubfolderSpec = 16; files = (D10000000000000000000002 /* SarahiaWatch.app in Embed Watch Content */, ); name = "Embed Watch Content"; runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXCopyFilesBuildPhase section */
+/* Begin PBXContainerItemProxy section */
+D1000000000000000000000D /* PBXContainerItemProxy */ = {isa = PBXContainerItemProxy; containerPortal = A1B2C3D40006000100000001 /* Project object */; proxyType = 1; remoteGlobalIDString = D10000000000000000000008; remoteInfo = SarahiaWatch; };
+/* End PBXContainerItemProxy section */
+/* Begin PBXFileReference section */
+		A1B2C3D40002000100000001 /* SarahIAApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SarahIAApp.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000003 /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000004 /* AIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIService.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000005 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000006 /* ChatViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModel.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000007 /* ChatBubbleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatBubbleView.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000009 /* TypingIndicatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypingIndicatorView.swift; sourceTree = "<group>"; };
+		A1B2C3D4000200010000000A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A1B2C3D4000200010000000B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A1B2C3D4000200010000000D /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
+		A1B2C3D4000200010000000C /* SarahIA.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SarahIA.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A1B2C3D40002000100000010 /* StorageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageService.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000011 /* AudioEngineManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioEngineManager.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000012 /* WhisperService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhisperService.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000013 /* TTSService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTSService.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000017 /* HapticService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticService.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000018 /* MemoryVaultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryVaultView.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000019 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		A1B2C3D4000200010000001E /* LocalNeuralIntelligenceEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalNeuralIntelligenceEngine.swift; sourceTree = "<group>"; };
+		A1B2C3D4000200010000001F /* TranslationEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationEngine.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000020 /* ModelDownloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelDownloader.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000021 /* NetworkMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkMonitor.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000022 /* LocalVisionEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalVisionEngine.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000023 /* SemanticMemoryIndex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SemanticMemoryIndex.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000024 /* DeviceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceController.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000026 /* LocalScriptSandbox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalScriptSandbox.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000027 /* ClipboardCompanion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardCompanion.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000028 /* WakeWordDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WakeWordDetector.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000029 /* BackTapGestureDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackTapGestureDetector.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000030 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000031 /* ChatScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatScreenView.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000032 /* Conversation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Conversation.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000034 /* AppleSpeechRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSpeechRecognizer.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000035 /* AudioSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioSessionManager.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000036 /* SpeechManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechManager.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000037 /* MessageList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageList.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000038 /* MessageBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageBar.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000039 /* KeyboardObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardObserver.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000044 /* WebSearchService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSearchService.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000045 /* MediaStreamingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaStreamingService.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000046 /* SarahBrainEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SarahBrainEngine.swift; sourceTree = "<group>"; };
+		A1B2C3D4000200010000004C /* WeatherService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherService.swift; sourceTree = "<group>"; };
+		A1B2C3D4000200010000004D /* RedAlertService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RedAlertService.swift; sourceTree = "<group>"; };
+		A1B2C3D4000200010000004E /* NewsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewsService.swift; sourceTree = "<group>"; };
+		A1B2C3D4000200010000004F /* YouTubeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YouTubeService.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000060 /* YouTubePlayerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YouTubePlayerViewController.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000062 /* TTSManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTSManager.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000065 /* FlashlightManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlashlightManager.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000066 /* BatteryMonitorManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryMonitorManager.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000068 /* SarahVoiceWaveSquareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SarahVoiceWaveSquareView.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000069 /* IsraelCityDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IsraelCityDatabase.swift; sourceTree = "<group>"; };
+		A1B2C3D4000200010000006A /* IsraelAlertService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IsraelAlertService.swift; sourceTree = "<group>"; };
+		A1B2C3D4000200010000006B /* AlertCardRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertCardRenderer.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000070 /* AgentType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentType.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000071 /* TomKnowledgeBase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TomKnowledgeBase.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000072 /* YohanLexiconEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YohanLexiconEngine.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000073 /* VAICodeEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VAICodeEngine.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000074 /* MultiAgentCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiAgentCoordinator.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000075 /* MultiAgentVoiceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiAgentVoiceManager.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000076 /* MultiAgentOrbView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiAgentOrbView.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000077 /* VoiceOrbModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceOrbModalView.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000078 /* VAICodingStudioView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VAICodingStudioView.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000079 /* CommonStyles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonStyles.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000080 /* DeviceCapabilityProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceCapabilityProfile.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000081 /* DeviceCapabilityDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceCapabilityDetector.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000082 /* ModelProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelProfile.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000083 /* ModelSelectionEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelSelectionEngine.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000084 /* EmbeddedModelManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbeddedModelManager.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000085 /* AIResourceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIResourceManager.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000086 /* AIStreamingBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIStreamingBuffer.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000087 /* AIProgressiveScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIProgressiveScheduler.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000088 /* HardwareDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HardwareDetector.swift; sourceTree = "<group>"; };
+		A1B2C3D4000200010000008A /* AdvancedVisionEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedVisionEngine.swift; sourceTree = "<group>"; };
+		A1B2C3D4000200010000008B /* OpenSourceMusicEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenSourceMusicEngine.swift; sourceTree = "<group>"; };
+		A1B2C3D4000200010000008C /* OpenSourceImageGenerationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenSourceImageGenerationService.swift; sourceTree = "<group>"; };
+		A1B2C3D4000200010000008D /* MultimodalMediaCardViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultimodalMediaCardViews.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000090 /* LiveTranslationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveTranslationModels.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000092 /* LiveSpeechTranslationPipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveSpeechTranslationPipeline.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000093 /* LiveTranslationSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveTranslationSession.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000094 /* LiveTranslationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveTranslationView.swift; sourceTree = "<group>"; };
+		A1B2C3D40002000100000096 /* OfflineTranslationAssetLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineTranslationAssetLoader.swift; sourceTree = "<group>"; };
+		A1B2C3D4000200010000009B /* SarahDesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SarahDesignSystem.swift; sourceTree = "<group>"; };
+		A1B2C3D4000200010000009C /* SarahActionCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SarahActionCoordinator.swift; sourceTree = "<group>"; };
+		A1B2C3D4000200010000009D /* VirtualPhoneManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualPhoneManager.swift; sourceTree = "<group>"; };
+		A1B2C3D4000200010000009E /* VirtualPhoneViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualPhoneViewController.swift; sourceTree = "<group>"; };
+		A1B2C3D4000200010000009F /* DevCodeInjector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevCodeInjector.swift; sourceTree = "<group>"; };
+		A1B2C3D400020001000000A0 /* SessionTimeoutManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionTimeoutManager.swift; sourceTree = "<group>"; };
+		A1B2C3D400020001000000A1 /* RealtimeAudioWaveformExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealtimeAudioWaveformExtractor.swift; sourceTree = "<group>"; };
+		A1B2C3D400020001000000A2 /* BackgroundModelDownloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundModelDownloader.swift; sourceTree = "<group>"; };
+		A1B2C3D400020001000000A3 /* SQLiteChatDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SQLiteChatDatabase.swift; sourceTree = "<group>"; };
+		A1B2C3D400020001000000A4 /* SarahLocalImageGenEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SarahLocalImageGenEngine.swift; sourceTree = "<group>"; };
+		A1B2C3D400020001000000B1 /* SarahLocalMusicGenEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SarahLocalMusicGenEngine.swift; sourceTree = "<group>"; };
+
+D10000000000000000000004 /* SarahiaWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SarahiaWatchApp.swift; sourceTree = "<group>"; };
+D10000000000000000000013 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+D10000000000000000000005 /* SarahiaWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SarahiaWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+D10000000000000000000006 /* SarahWatchBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SarahWatchBridge.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+D1000000000000000000000B /* Frameworks Watch */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		A1B2C3D40003000100000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1B2C3D400010001000000B0 /* ZIPFoundation in Frameworks */,
+				A1B2C3D400010001000000B3 /* StableDiffusion in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A1B2C3D40004000100000001 = {
+			isa = PBXGroup;
+			children = (
+				A1B2C3D40004000100000002 /* SarahIA */,
+				A1B2C3D40004000100000007 /* Products */,
+D10000000000000000000007 /* SarahiaWatch */,
+			);
+			sourceTree = "<group>";
+		};
+		A1B2C3D40004000100000002 /* SarahIA */ = {
+			isa = PBXGroup;
+			children = (
+				A1B2C3D40002000100000001 /* SarahIAApp.swift */,
+				A1B2C3D40002000100000002 /* ContentView.swift */,
+				A1B2C3D40004000100000003 /* Models */,
+				A1B2C3D40004000100000004 /* Services */,
+				A1B2C3D40004000100000005 /* Views */,
+				A1B2C3D40004000100000006 /* ViewModels */,
+				A1B2C3D4000200010000000B /* Assets.xcassets */,
+				A1B2C3D4000200010000000D /* LaunchScreen.storyboard */,
+				A1B2C3D4000200010000000A /* Info.plist */,
+			);
+			path = SarahIA;
+			sourceTree = "<group>";
+		};
+		A1B2C3D40004000100000003 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				A1B2C3D40002000100000070 /* AgentType.swift */,
+				A1B2C3D40002000100000003 /* Message.swift */,
+				A1B2C3D40002000100000032 /* Conversation.swift */,
+				A1B2C3D40002000100000069 /* IsraelCityDatabase.swift */,
+				A1B2C3D40002000100000090 /* LiveTranslationModels.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		A1B2C3D40004000100000004 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				A1B2C3D40002000100000074 /* MultiAgentCoordinator.swift */,
+				A1B2C3D40002000100000075 /* MultiAgentVoiceManager.swift */,
+				A1B2C3D40002000100000071 /* TomKnowledgeBase.swift */,
+				A1B2C3D40002000100000072 /* YohanLexiconEngine.swift */,
+				A1B2C3D40002000100000073 /* VAICodeEngine.swift */,
+				A1B2C3D40002000100000010 /* StorageService.swift */,
+				A1B2C3D40002000100000011 /* AudioEngineManager.swift */,
+				A1B2C3D40002000100000012 /* WhisperService.swift */,
+				A1B2C3D40002000100000013 /* TTSService.swift */,
+				A1B2C3D40002000100000004 /* AIService.swift */,
+				A1B2C3D40002000100000005 /* NotificationService.swift */,
+				A1B2C3D40002000100000017 /* HapticService.swift */,
+				A1B2C3D4000200010000001E /* LocalNeuralIntelligenceEngine.swift */,
+				A1B2C3D4000200010000008A /* AdvancedVisionEngine.swift */,
+				A1B2C3D4000200010000008B /* OpenSourceMusicEngine.swift */,
+				A1B2C3D4000200010000008C /* OpenSourceImageGenerationService.swift */,
+				A1B2C3D4000200010000001F /* TranslationEngine.swift */,
+				A1B2C3D40002000100000020 /* ModelDownloader.swift */,
+				A1B2C3D40002000100000021 /* NetworkMonitor.swift */,
+				A1B2C3D40002000100000022 /* LocalVisionEngine.swift */,
+				A1B2C3D40002000100000023 /* SemanticMemoryIndex.swift */,
+				A1B2C3D40002000100000024 /* DeviceController.swift */,
+				A1B2C3D40002000100000026 /* LocalScriptSandbox.swift */,
+				A1B2C3D40002000100000027 /* ClipboardCompanion.swift */,
+				A1B2C3D40002000100000028 /* WakeWordDetector.swift */,
+				A1B2C3D40002000100000029 /* BackTapGestureDetector.swift */,
+				A1B2C3D40002000100000034 /* AppleSpeechRecognizer.swift */,
+				A1B2C3D40002000100000035 /* AudioSessionManager.swift */,
+				A1B2C3D40002000100000036 /* SpeechManager.swift */,
+				A1B2C3D40002000100000039 /* KeyboardObserver.swift */,
+				A1B2C3D40002000100000044 /* WebSearchService.swift */,
+				A1B2C3D40002000100000045 /* MediaStreamingService.swift */,
+				A1B2C3D40002000100000046 /* SarahBrainEngine.swift */,
+				A1B2C3D4000200010000004C /* WeatherService.swift */,
+				A1B2C3D4000200010000004D /* RedAlertService.swift */,
+				A1B2C3D4000200010000004E /* NewsService.swift */,
+				A1B2C3D4000200010000004F /* YouTubeService.swift */,
+				A1B2C3D40002000100000062 /* TTSManager.swift */,
+				A1B2C3D40002000100000065 /* FlashlightManager.swift */,
+				A1B2C3D40002000100000066 /* BatteryMonitorManager.swift */,
+				A1B2C3D4000200010000006A /* IsraelAlertService.swift */,
+				A1B2C3D40002000100000080 /* DeviceCapabilityProfile.swift */,
+				A1B2C3D40002000100000081 /* DeviceCapabilityDetector.swift */,
+				A1B2C3D40002000100000082 /* ModelProfile.swift */,
+				A1B2C3D40002000100000083 /* ModelSelectionEngine.swift */,
+				A1B2C3D40002000100000084 /* EmbeddedModelManager.swift */,
+				A1B2C3D40002000100000085 /* AIResourceManager.swift */,
+				A1B2C3D40002000100000086 /* AIStreamingBuffer.swift */,
+				A1B2C3D40002000100000087 /* AIProgressiveScheduler.swift */,
+				A1B2C3D40002000100000088 /* HardwareDetector.swift */,
+				A1B2C3D40002000100000092 /* LiveSpeechTranslationPipeline.swift */,
+				A1B2C3D40002000100000093 /* LiveTranslationSession.swift */,
+D10000000000000000000006 /* SarahWatchBridge.swift */,
+				A1B2C3D40002000100000096 /* OfflineTranslationAssetLoader.swift */,
+				A1B2C3D4000200010000009C /* SarahActionCoordinator.swift */,
+				A1B2C3D4000200010000009D /* VirtualPhoneManager.swift */,
+				A1B2C3D4000200010000009F /* DevCodeInjector.swift */,
+				A1B2C3D400020001000000A0 /* SessionTimeoutManager.swift */,
+				A1B2C3D400020001000000A1 /* RealtimeAudioWaveformExtractor.swift */,
+				A1B2C3D400020001000000A2 /* BackgroundModelDownloader.swift */,
+				A1B2C3D400020001000000A3 /* SQLiteChatDatabase.swift */,
+				A1B2C3D400020001000000A4 /* SarahLocalImageGenEngine.swift */,
+				A1B2C3D400020001000000B1 /* SarahLocalMusicGenEngine.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		A1B2C3D40004000100000005 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				A1B2C3D40002000100000076 /* MultiAgentOrbView.swift */,
+				A1B2C3D40002000100000077 /* VoiceOrbModalView.swift */,
+				A1B2C3D40002000100000078 /* VAICodingStudioView.swift */,
+				A1B2C3D40002000100000079 /* CommonStyles.swift */,
+				A1B2C3D40002000100000007 /* ChatBubbleView.swift */,
+				A1B2C3D40002000100000009 /* TypingIndicatorView.swift */,
+				A1B2C3D40002000100000018 /* MemoryVaultView.swift */,
+				A1B2C3D40002000100000019 /* SettingsView.swift */,
+				A1B2C3D40002000100000030 /* SidebarView.swift */,
+				A1B2C3D40002000100000031 /* ChatScreenView.swift */,
+				A1B2C3D40002000100000037 /* MessageList.swift */,
+				A1B2C3D40002000100000038 /* MessageBar.swift */,
+				A1B2C3D40002000100000060 /* YouTubePlayerViewController.swift */,
+				A1B2C3D40002000100000068 /* SarahVoiceWaveSquareView.swift */,
+				A1B2C3D4000200010000006B /* AlertCardRenderer.swift */,
+				A1B2C3D4000200010000008D /* MultimodalMediaCardViews.swift */,
+				A1B2C3D40002000100000094 /* LiveTranslationView.swift */,
+				A1B2C3D4000200010000009B /* SarahDesignSystem.swift */,
+				A1B2C3D4000200010000009E /* VirtualPhoneViewController.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		A1B2C3D40004000100000006 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				A1B2C3D40002000100000006 /* ChatViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		A1B2C3D40004000100000007 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A1B2C3D4000200010000000C /* SarahIA.app */,
+D10000000000000000000005 /* SarahiaWatch.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+
+D10000000000000000000007 /* SarahiaWatch */ = {isa = PBXGroup; children = (D10000000000000000000004 /* SarahiaWatchApp.swift */, D10000000000000000000013 /* Assets.xcassets */, ); path = SarahiaWatch; sourceTree = "<group>"; };
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A1B2C3D40005000100000001 /* SarahIA */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A1B2C3D40007000100000003 /* Build configuration list for PBXNativeTarget "SarahIA" */;
+			buildPhases = (
+				A1B2C3D40003000100000002 /* Sources */,
+				A1B2C3D40003000100000001 /* Frameworks */,
+				A1B2C3D40003000100000003 /* Resources */,
+D10000000000000000000009 /* Embed Watch Content */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+D1000000000000000000000E /* PBXTargetDependency */,
+			);
+			name = SarahIA;
+			packageProductDependencies = (
+				A1B2C3D4000B000100000001 /* ZIPFoundation */,
+				A1B2C3D4000B000100000003 /* StableDiffusion */,
+			);
+			productName = SarahIA;
+			productReference = A1B2C3D4000200010000000C /* SarahIA.app */;
+			productType = "com.apple.product-type.application";
+		};
+
+D10000000000000000000008 /* SarahiaWatch */ = {isa = PBXNativeTarget; buildConfigurationList = D10000000000000000000011 /* Build configuration list for PBXNativeTarget "SarahiaWatch" */; buildPhases = (D1000000000000000000000A /* Sources */, D1000000000000000000000B /* Frameworks */, D1000000000000000000000C /* Resources */, ); buildRules = (); dependencies = (); name = SarahiaWatch; packageProductDependencies = (); productName = SarahiaWatch; productReference = D10000000000000000000005 /* SarahiaWatch.app */; productType = "com.apple.product-type.application"; };
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A1B2C3D40006000100000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					A1B2C3D40005000100000001 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = A1B2C3D40007000100000006 /* Build configuration list for PBXProject "SarahIA" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = fr;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				fr,
+				Base,
+			);
+			mainGroup = A1B2C3D40004000100000001;
+			packageReferences = (
+				A1B2C3D4000A000100000001 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
+				A1B2C3D4000A000100000003 /* XCRemoteSwiftPackageReference "ml-stable-diffusion" */,
+			);
+			productRefGroup = A1B2C3D40004000100000007 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A1B2C3D40005000100000001 /* SarahIA */,
+D10000000000000000000008 /* SarahiaWatch */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+D1000000000000000000000C /* Resources Watch */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (D10000000000000000000012 /* Watch Assets.xcassets in Resources */, ); runOnlyForDeploymentPostprocessing = 0; };
+		A1B2C3D40003000100000003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1B2C3D4000100010000000B /* Assets.xcassets in Resources */,
+				A1B2C3D4000100010000000D /* LaunchScreen.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+D1000000000000000000000A /* Sources Watch */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (D10000000000000000000001 /* SarahiaWatchApp.swift in Sources */, ); runOnlyForDeploymentPostprocessing = 0; };
+		A1B2C3D40003000100000002 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1B2C3D40001000100000001 /* SarahIAApp.swift in Sources */,
+				A1B2C3D40001000100000002 /* ContentView.swift in Sources */,
+				A1B2C3D40001000100000003 /* Message.swift in Sources */,
+				A1B2C3D40001000100000004 /* AIService.swift in Sources */,
+				A1B2C3D40001000100000005 /* NotificationService.swift in Sources */,
+				A1B2C3D40001000100000006 /* ChatViewModel.swift in Sources */,
+				A1B2C3D40001000100000007 /* ChatBubbleView.swift in Sources */,
+				A1B2C3D40001000100000009 /* TypingIndicatorView.swift in Sources */,
+				A1B2C3D40001000100000010 /* StorageService.swift in Sources */,
+				A1B2C3D40001000100000011 /* AudioEngineManager.swift in Sources */,
+				A1B2C3D40001000100000012 /* WhisperService.swift in Sources */,
+				A1B2C3D40001000100000013 /* TTSService.swift in Sources */,
+				A1B2C3D40001000100000017 /* HapticService.swift in Sources */,
+				A1B2C3D40001000100000018 /* MemoryVaultView.swift in Sources */,
+				A1B2C3D40001000100000019 /* SettingsView.swift in Sources */,
+				A1B2C3D4000100010000001E /* LocalNeuralIntelligenceEngine.swift in Sources */,
+				A1B2C3D4000100010000008A /* AdvancedVisionEngine.swift in Sources */,
+				A1B2C3D4000100010000008B /* OpenSourceMusicEngine.swift in Sources */,
+				A1B2C3D4000100010000008C /* OpenSourceImageGenerationService.swift in Sources */,
+				A1B2C3D4000100010000001F /* TranslationEngine.swift in Sources */,
+				A1B2C3D40001000100000020 /* ModelDownloader.swift in Sources */,
+				A1B2C3D40001000100000021 /* NetworkMonitor.swift in Sources */,
+				A1B2C3D40001000100000022 /* LocalVisionEngine.swift in Sources */,
+				A1B2C3D40001000100000023 /* SemanticMemoryIndex.swift in Sources */,
+				A1B2C3D40001000100000024 /* DeviceController.swift in Sources */,
+				A1B2C3D40001000100000026 /* LocalScriptSandbox.swift in Sources */,
+				A1B2C3D40001000100000027 /* ClipboardCompanion.swift in Sources */,
+				A1B2C3D40001000100000028 /* WakeWordDetector.swift in Sources */,
+				A1B2C3D40001000100000029 /* BackTapGestureDetector.swift in Sources */,
+				A1B2C3D40001000100000030 /* SidebarView.swift in Sources */,
+				A1B2C3D40001000100000031 /* ChatScreenView.swift in Sources */,
+				A1B2C3D40001000100000032 /* Conversation.swift in Sources */,
+				A1B2C3D40001000100000034 /* AppleSpeechRecognizer.swift in Sources */,
+				A1B2C3D40001000100000035 /* AudioSessionManager.swift in Sources */,
+				A1B2C3D40001000100000036 /* SpeechManager.swift in Sources */,
+				A1B2C3D40001000100000037 /* MessageList.swift in Sources */,
+				A1B2C3D40001000100000038 /* MessageBar.swift in Sources */,
+				A1B2C3D40001000100000039 /* KeyboardObserver.swift in Sources */,
+				A1B2C3D40001000100000044 /* WebSearchService.swift in Sources */,
+				A1B2C3D40001000100000045 /* MediaStreamingService.swift in Sources */,
+				A1B2C3D40001000100000046 /* SarahBrainEngine.swift in Sources */,
+				A1B2C3D4000100010000004C /* WeatherService.swift in Sources */,
+				A1B2C3D4000100010000004D /* RedAlertService.swift in Sources */,
+				A1B2C3D4000100010000004E /* NewsService.swift in Sources */,
+				A1B2C3D4000100010000004F /* YouTubeService.swift in Sources */,
+				A1B2C3D40001000100000060 /* YouTubePlayerViewController.swift in Sources */,
+				A1B2C3D40001000100000062 /* TTSManager.swift in Sources */,
+				A1B2C3D40001000100000065 /* FlashlightManager.swift in Sources */,
+				A1B2C3D40001000100000066 /* BatteryMonitorManager.swift in Sources */,
+				A1B2C3D40001000100000068 /* SarahVoiceWaveSquareView.swift in Sources */,
+				A1B2C3D40001000100000069 /* IsraelCityDatabase.swift in Sources */,
+				A1B2C3D4000100010000006A /* IsraelAlertService.swift in Sources */,
+				A1B2C3D4000100010000006B /* AlertCardRenderer.swift in Sources */,
+				A1B2C3D40001000100000070 /* AgentType.swift in Sources */,
+				A1B2C3D40001000100000071 /* TomKnowledgeBase.swift in Sources */,
+				A1B2C3D40001000100000072 /* YohanLexiconEngine.swift in Sources */,
+				A1B2C3D40001000100000073 /* VAICodeEngine.swift in Sources */,
+				A1B2C3D40001000100000074 /* MultiAgentCoordinator.swift in Sources */,
+				A1B2C3D40001000100000075 /* MultiAgentVoiceManager.swift in Sources */,
+				A1B2C3D40001000100000076 /* MultiAgentOrbView.swift in Sources */,
+				A1B2C3D40001000100000077 /* VoiceOrbModalView.swift in Sources */,
+				A1B2C3D40001000100000078 /* VAICodingStudioView.swift in Sources */,
+				A1B2C3D40001000100000079 /* CommonStyles.swift in Sources */,
+				A1B2C3D40001000100000080 /* DeviceCapabilityProfile.swift in Sources */,
+				A1B2C3D40001000100000081 /* DeviceCapabilityDetector.swift in Sources */,
+				A1B2C3D40001000100000082 /* ModelProfile.swift in Sources */,
+				A1B2C3D40001000100000083 /* ModelSelectionEngine.swift in Sources */,
+				A1B2C3D40001000100000084 /* EmbeddedModelManager.swift in Sources */,
+				A1B2C3D40001000100000085 /* AIResourceManager.swift in Sources */,
+				A1B2C3D40001000100000086 /* AIStreamingBuffer.swift in Sources */,
+				A1B2C3D40001000100000087 /* AIProgressiveScheduler.swift in Sources */,
+				A1B2C3D40001000100000088 /* HardwareDetector.swift in Sources */,
+				A1B2C3D4000100010000008D /* MultimodalMediaCardViews.swift in Sources */,
+				A1B2C3D40001000100000090 /* LiveTranslationModels.swift in Sources */,
+				A1B2C3D40001000100000092 /* LiveSpeechTranslationPipeline.swift in Sources */,
+				A1B2C3D40001000100000093 /* LiveTranslationSession.swift in Sources */,
+D10000000000000000000003 /* SarahWatchBridge.swift in Sources */,
+				A1B2C3D40001000100000094 /* LiveTranslationView.swift in Sources */,
+				A1B2C3D40001000100000096 /* OfflineTranslationAssetLoader.swift in Sources */,
+				A1B2C3D4000100010000009B /* SarahDesignSystem.swift in Sources */,
+				A1B2C3D4000100010000009C /* SarahActionCoordinator.swift in Sources */,
+				A1B2C3D4000100010000009D /* VirtualPhoneManager.swift in Sources */,
+				A1B2C3D4000100010000009E /* VirtualPhoneViewController.swift in Sources */,
+				A1B2C3D4000100010000009F /* DevCodeInjector.swift in Sources */,
+				A1B2C3D400010001000000A0 /* SessionTimeoutManager.swift in Sources */,
+				A1B2C3D400010001000000A1 /* RealtimeAudioWaveformExtractor.swift in Sources */,
+				A1B2C3D400010001000000A2 /* BackgroundModelDownloader.swift in Sources */,
+				A1B2C3D400010001000000A3 /* SQLiteChatDatabase.swift in Sources */,
+				A1B2C3D400010001000000A4 /* SarahLocalImageGenEngine.swift in Sources */,
+				A1B2C3D400010001000000B1 /* SarahLocalMusicGenEngine.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		A1B2C3D4000A000100000001 /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/weichsel/ZIPFoundation.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.20;
+			};
+		};
+		A1B2C3D4000A000100000003 /* XCRemoteSwiftPackageReference "ml-stable-diffusion" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple-aiml-research/ml-stable-diffusion.git";
+			requirement = {
+				kind = exactVersion;
+				version = 1.1.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A1B2C3D4000B000100000001 /* ZIPFoundation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A1B2C3D4000A000100000001 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
+			productName = ZIPFoundation;
+		};
+		A1B2C3D4000B000100000003 /* StableDiffusion */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A1B2C3D4000A000100000003 /* XCRemoteSwiftPackageReference "ml-stable-diffusion" */;
+			productName = StableDiffusion;
+		};
+/* End XCSwiftPackageProductDependency section */
+
+/* Begin PBXTargetDependency section */
+D1000000000000000000000E /* PBXTargetDependency */ = {isa = PBXTargetDependency; target = D10000000000000000000008 /* SarahiaWatch */; targetProxy = D1000000000000000000000D /* PBXContainerItemProxy */; };
+/* End PBXTargetDependency section */
+/* Begin XCBuildConfiguration section */
+D1000000000000000000000F /* Debug Watch */ = {isa = XCBuildConfiguration; buildSettings = { ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 4; DEVELOPMENT_TEAM = ""; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_CFBundleDisplayName = "Local Agent LLM"; INFOPLIST_KEY_CFBundleIconName = AppIcon; INFOPLIST_KEY_NSMicrophoneUsageDescription = "Le microphone de la montre transcrit l'hebreu."; INFOPLIST_KEY_WKApplication = YES; INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.localagentllm.apple; MARKETING_VERSION = 3.1.0; PRODUCT_BUNDLE_IDENTIFIER = com.localagentllm.apple.watchkitapp; PRODUCT_NAME = "$(TARGET_NAME)"; SDKROOT = watchos; SKIP_INSTALL = YES; SWIFT_VERSION = 5.0; SUPPORTED_PLATFORMS = "watchos watchsimulator"; TARGETED_DEVICE_FAMILY = 4; WATCHOS_DEPLOYMENT_TARGET = 10.0; }; name = Debug; };
+D10000000000000000000010 /* Release Watch */ = {isa = XCBuildConfiguration; buildSettings = { ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 4; DEVELOPMENT_TEAM = ""; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_CFBundleDisplayName = "Local Agent LLM"; INFOPLIST_KEY_CFBundleIconName = AppIcon; INFOPLIST_KEY_NSMicrophoneUsageDescription = "Le microphone de la montre transcrit l'hebreu."; INFOPLIST_KEY_WKApplication = YES; INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.localagentllm.apple; MARKETING_VERSION = 3.1.0; PRODUCT_BUNDLE_IDENTIFIER = com.localagentllm.apple.watchkitapp; PRODUCT_NAME = "$(TARGET_NAME)"; SDKROOT = watchos; SKIP_INSTALL = YES; SWIFT_VERSION = 5.0; SUPPORTED_PLATFORMS = "watchos watchsimulator"; TARGETED_DEVICE_FAMILY = 4; WATCHOS_DEPLOYMENT_TARGET = 10.0; }; name = Release; };
+
+		A1B2C3D40007000100000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_GENERATE_ASSET_SYMBOLS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = NO;
+				AD_HOC_CODE_SIGNING_ALLOWED = YES;
+				CODE_SIGN_ENTITLEMENTS = SarahIA/SarahIA.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				CODE_SIGNING_ALLOWED = YES;
+				CODE_SIGNING_REQUIRED = NO;
+				CURRENT_PROJECT_VERSION = 4;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = SarahIA/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Local Agent LLM";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 3.1.0;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-weak_framework",
+					SwiftUI,
+					"-weak_framework",
+					Combine,
+					"-weak_framework",
+					Vision,
+					"-framework",
+					AVFoundation,
+					"-framework",
+					WebKit,
+					"-framework",
+					MapKit,
+					"-framework",
+					whisper,
+					"-framework",
+					llama,
+					"-framework",
+					Accelerate,
+					"-framework",
+					Metal,
+					"-framework",
+					MetalKit,
+					"-framework",
+					CoreML,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.localagentllm.apple;
+				PRODUCT_NAME = SarahIA;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1";
+			};
+			name = Debug;
+		};
+		A1B2C3D40007000100000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_GENERATE_ASSET_SYMBOLS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = NO;
+				AD_HOC_CODE_SIGNING_ALLOWED = YES;
+				CODE_SIGN_ENTITLEMENTS = SarahIA/SarahIA.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				CODE_SIGNING_ALLOWED = YES;
+				CODE_SIGNING_REQUIRED = NO;
+				CURRENT_PROJECT_VERSION = 4;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = SarahIA/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Local Agent LLM";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 3.1.0;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-weak_framework",
+					SwiftUI,
+					"-weak_framework",
+					Combine,
+					"-weak_framework",
+					Vision,
+					"-framework",
+					AVFoundation,
+					"-framework",
+					WebKit,
+					"-framework",
+					MapKit,
+					"-framework",
+					whisper,
+					"-framework",
+					llama,
+					"-framework",
+					Accelerate,
+					"-framework",
+					Metal,
+					"-framework",
+					MetalKit,
+					"-framework",
+					CoreML,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.localagentllm.apple;
+				PRODUCT_NAME = SarahIA;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1";
+			};
+			name = Release;
+		};
+		A1B2C3D40007000100000004 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_ASSET_SYMBOLS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = NO;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		A1B2C3D40007000100000005 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_ASSET_SYMBOLS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = NO;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A1B2C3D40007000100000003 /* Build configuration list for PBXNativeTarget "SarahIA" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A1B2C3D40007000100000001 /* Debug */,
+				A1B2C3D40007000100000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A1B2C3D40007000100000006 /* Build configuration list for PBXProject "SarahIA" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A1B2C3D40007000100000004 /* Debug */,
+				A1B2C3D40007000100000005 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+D10000000000000000000011 /* Build configuration list for PBXNativeTarget "SarahiaWatch" */ = {isa = XCConfigurationList; buildConfigurations = (D1000000000000000000000F /* Debug */, D10000000000000000000010 /* Release */, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+/* End XCConfigurationList section */
+	};
+	rootObject = A1B2C3D40006000100000001 /* Project object */;
+}

@@ -1,0 +1,13 @@
+{
+  "product": "Local Agent LLM",
+  "letters": "LAM",
+  "generator": "built-in image_gen",
+  "source": "android/branding/lam-master.png",
+  "sha256": "13df3bcb9d983d58fcd61d6a525871ca07cf528c2be482f9305327548f0e556a",
+  "prompt": "Premium geometric monogram: exactly one capital L, one A and one M. Pure white on pure black, flat, centered, no other text, no shadows or borders; generous Android adaptive-icon safe padding.",
+  "generatedFor": [
+    "Android launcher",
+    "Google Play icon"
+  ],
+  "date": "2026-11-13"
+}

@@ -1,0 +1,556 @@
+import SwiftUI
+import UIKit
+import PhotosUI
+import UniformTypeIdentifiers
+
+/// Interface vocale Sarah.
+/// Pas de bouton X : la vue se réduit ou se ferme naturellement par glissement.
+@available(iOS 15.0, *)
+public struct VoiceOrbModalView: View {
+    @ObservedObject var viewModel: ChatViewModel
+
+    private let onOpenMenu: () -> Void
+    private let onOpenSettings: () -> Void
+
+    @State private var pulse = false
+    @State private var drift = false
+    @State private var isShowingPhotoPicker = false
+    @State private var selectedPhotoItem: PhotosPickerItem? = nil
+    @State private var isShowingCamera = false
+    @State private var isShowingFileImporter = false
+
+    public init(
+        viewModel: ChatViewModel,
+        onOpenMenu: @escaping () -> Void = {},
+        onOpenSettings: @escaping () -> Void = {}
+    ) {
+        self.viewModel = viewModel
+        self.onOpenMenu = onOpenMenu
+        self.onOpenSettings = onOpenSettings
+    }
+
+    private var accent: Color {
+        viewModel.activeAgent.themeColor
+    }
+
+    private var normalizedLevel: CGFloat {
+        min(max(CGFloat(viewModel.micInputLevel), 0), 1)
+    }
+
+    private var statusTitle: String {
+        switch viewModel.voiceStatus {
+        case .processing:
+            return "Je réfléchis…"
+        case .speaking:
+            return "Sarah parle"
+        case .error:
+            return "Whisper indisponible"
+        case .starting:
+            return "Activation du micro…"
+        default:
+            if !viewModel.liveTranscriptionText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                return "Je t’écoute."
+            }
+            return viewModel.isVoiceMicrophoneMuted ? "Micro coupé" : "Je t’écoute."
+        }
+    }
+
+    private var statusSubtitle: String {
+        switch viewModel.voiceStatus {
+        case .error(let message):
+            return message
+        case .starting:
+            return WhisperService.shared.isModelLoading
+                ? "Chargement du modèle Whisper local…"
+                : "Autorise le microphone si iOS le demande"
+        case .processing:
+            return "Un instant…"
+        case .speaking:
+            return "Tu peux interrompre Sarah en touchant le micro"
+        default:
+            return viewModel.isVoiceMicrophoneMuted ? "Touchez le micro pour reprendre" : "Parle normalement"
+        }
+    }
+
+    public var body: some View {
+        GeometryReader { proxy in
+            let compact = proxy.size.height < 430
+
+            ZStack {
+                Color.black
+                    .ignoresSafeArea()
+
+                RadialGradient(
+                    gradient: Gradient(colors: [
+                        accent.opacity(compact ? 0.08 : 0.14),
+                        accent.opacity(0.025),
+                        Color.clear
+                    ]),
+                    center: compact ? .bottom : .center,
+                    startRadius: 40,
+                    endRadius: compact ? 260 : 430
+                )
+                .ignoresSafeArea()
+
+                if compact {
+                    compactLayout
+                } else {
+                    expandedLayout
+                }
+            }
+        }
+        .photosPicker(
+            isPresented: $isShowingPhotoPicker,
+            selection: $selectedPhotoItem,
+            matching: .images
+        )
+        .onChange(of: selectedPhotoItem) { item in
+            analyzeSelectedPhoto(item)
+        }
+        .sheet(isPresented: $isShowingCamera) {
+            VoiceCameraPicker { image in
+                isShowingCamera = false
+                if let image { analyzeCameraImage(image) }
+            }
+        }
+        .fileImporter(
+            isPresented: $isShowingFileImporter,
+            allowedContentTypes: [.item],
+            allowsMultipleSelection: false
+        ) { result in
+            switch result {
+            case .success(let urls):
+                if let url = urls.first { viewModel.appendImportedFile(url: url) }
+            case .failure(let error):
+                viewModel.inputText = "Impossible d'ouvrir le fichier : \(error.localizedDescription)"
+            }
+        }
+        .onAppear {
+            pulse = true
+            drift = true
+            // Rouvrir depuis le mini-orbe ne doit ni couper la parole de Sarah,
+            // ni sortir d'une pause micro volontaire.
+            if !viewModel.isContinuousConversationActive {
+                viewModel.startVoiceConversation()
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)) { _ in
+            // Sarah ne doit jamais conserver une route audio active quand
+            // l'utilisateur quitte l'app ou ouvre Siri / un appel.
+            viewModel.stopVoiceConversation()
+        }
+    }
+
+    private func analyzeSelectedPhoto(_ item: PhotosPickerItem?) {
+        guard let item else { return }
+        Task {
+            do {
+                guard let data = try await item.loadTransferable(type: Data.self),
+                      let image = UIImage(data: data) else {
+                    await MainActor.run {
+                        viewModel.inputText = "Impossible de lire cette image."
+                    }
+                    return
+                }
+                analyzeCameraImage(image)
+            } catch {
+                await MainActor.run {
+                    viewModel.inputText = "Impossible d'ouvrir la photo : \(error.localizedDescription)"
+                }
+            }
+        }
+    }
+
+    private func analyzeCameraImage(_ image: UIImage) {
+        LocalVisionEngine.shared.recognizeObject(in: image) { result in
+            DispatchQueue.main.async {
+                viewModel.appendVisionAnalysis(image: image, result: result)
+            }
+        }
+    }
+
+    // MARK: - Grand mode vocal
+
+    private var expandedLayout: some View {
+        VStack(spacing: 0) {
+            header
+                .padding(.horizontal, 20)
+                .padding(.top, 12)
+
+            Spacer(minLength: 20)
+
+            orb(size: 292)
+                .frame(width: 320, height: 320)
+
+            Spacer(minLength: 22)
+
+            VStack(spacing: 8) {
+                Text(statusTitle)
+                    .font(.system(size: 25, weight: .semibold, design: .rounded))
+                    .foregroundColor(.white)
+                    .multilineTextAlignment(.center)
+
+                if !viewModel.liveTranscriptionText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    Text(viewModel.liveTranscriptionText)
+                        .font(.system(size: 16, weight: .regular))
+                        .foregroundColor(Color.white.opacity(0.70))
+                        .multilineTextAlignment(.center)
+                        .lineLimit(3)
+                        .padding(.horizontal, 24)
+                } else {
+                    Text(statusSubtitle)
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(Color.white.opacity(0.46))
+                        .multilineTextAlignment(.center)
+                }
+            }
+            .frame(minHeight: 76)
+
+            Spacer(minLength: 24)
+
+            composer
+                .padding(.horizontal, 18)
+                .padding(.bottom, 18)
+        }
+    }
+
+    // MARK: - Mode réduit quand la feuille est baissée
+
+    private var compactLayout: some View {
+        VStack(spacing: 10) {
+            Spacer(minLength: 8)
+
+            orb(size: 86)
+                .frame(width: 112, height: 112)
+
+            Text(statusTitle)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundColor(Color.white.opacity(0.82))
+                .lineLimit(1)
+
+            composer
+                .padding(.horizontal, 14)
+                .padding(.bottom, 12)
+        }
+    }
+
+    // MARK: - En-tête
+
+    private var header: some View {
+        HStack(spacing: 14) {
+            circleButton(systemName: "line.3.horizontal") {
+                HapticService.shared.buttonTap()
+                closeVoiceSurface()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.10) {
+                    onOpenMenu()
+                }
+            }
+
+            Spacer()
+
+            Button {
+                HapticService.shared.buttonTap()
+                closeVoiceSurface()
+            } label: {
+                VStack(spacing: 2) {
+                    HStack(spacing: 7) {
+                        Text(viewModel.activeAgent.displayName)
+                            .font(.system(size: 22, weight: .bold, design: .rounded))
+                        Image(systemName: "chevron.down")
+                            .font(.system(size: 12, weight: .semibold))
+                    }
+                    .foregroundColor(.white)
+                    Text("Réduire · écoute maintenue")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(Color.white.opacity(0.64))
+                }
+            }
+            .buttonStyle(PlainButtonStyle())
+            .accessibilityLabel("Réduire le mode vocal sans couper l'écoute")
+            .accessibilityIdentifier("sarah.voice.minimize")
+
+            Spacer()
+
+            circleButton(systemName: "slider.horizontal.3") {
+                HapticService.shared.buttonTap()
+                closeVoiceSurface()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.10) {
+                    onOpenSettings()
+                }
+            }
+        }
+    }
+
+    private func closeVoiceSurface() {
+        // Comme dans la build 900, fermer la feuille réduit uniquement l'UI.
+        // La conversation reste active dans le mini-orbe du chat. Le bouton Stop
+        // de cette bulle ou le départ en arrière-plan coupe réellement l'audio.
+        withAnimation(.easeOut(duration: 0.16)) {
+            viewModel.isShowingVoiceOrbModal = false
+        }
+    }
+
+    // MARK: - Orbe Sarah
+
+    private func orb(size: CGFloat) -> some View {
+        let core = size * 0.72
+        let voiceBoost = 1.0 + normalizedLevel * 0.065
+
+        return ZStack {
+            Circle()
+                .fill(
+                    RadialGradient(
+                        gradient: Gradient(colors: [
+                            accent.opacity(0.30),
+                            accent.opacity(0.08),
+                            Color.clear
+                        ]),
+                        center: .center,
+                        startRadius: core * 0.20,
+                        endRadius: size * 0.52
+                    )
+                )
+                .frame(width: size, height: size)
+                .blur(radius: size > 150 ? 15 : 8)
+
+            ForEach(0..<2) { index in
+                Circle()
+                    .stroke(
+                        accent.opacity(index == 0 ? 0.40 : 0.18),
+                        lineWidth: 1
+                    )
+                    .frame(
+                        width: core + CGFloat(index * 30),
+                        height: core + CGFloat(index * 30)
+                    )
+                    .scaleEffect(
+                        (pulse ? 1.025 : 0.985)
+                        + normalizedLevel * CGFloat(index + 1) * 0.014
+                    )
+                    .animation(
+                        Animation.easeInOut(duration: 1.7 + Double(index) * 0.25)
+                            .repeatForever(autoreverses: true),
+                        value: pulse
+                    )
+            }
+
+            ZStack {
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                Color.white.opacity(0.96),
+                                accent.opacity(0.94),
+                                accent
+                            ]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+
+                Circle()
+                    .fill(Color.white.opacity(0.54))
+                    .frame(width: core * 0.48, height: core * 0.48)
+                    .blur(radius: size > 150 ? 17 : 8)
+                    .offset(
+                        x: drift ? -core * 0.08 : core * 0.09,
+                        y: drift ? core * 0.07 : -core * 0.07
+                    )
+                    .animation(
+                        Animation.easeInOut(duration: 3.0).repeatForever(autoreverses: true),
+                        value: drift
+                    )
+
+                Image(systemName: viewModel.activeAgent.iconName)
+                    .font(.system(size: max(18, core * 0.16), weight: .bold))
+                    .foregroundColor(.white)
+                    .shadow(color: Color.black.opacity(0.18), radius: 4, x: 0, y: 2)
+            }
+            .frame(width: core, height: core)
+            .clipShape(Circle())
+            .overlay(
+                Circle()
+                    .stroke(Color.white.opacity(0.46), lineWidth: 1.5)
+            )
+            .shadow(color: accent.opacity(0.58), radius: size > 150 ? 18 : 10)
+            .scaleEffect((pulse ? 1.012 : 0.992) * voiceBoost)
+            .animation(
+                Animation.spring(response: 0.26, dampingFraction: 0.76),
+                value: normalizedLevel
+            )
+        }
+        .contentShape(Circle())
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Orbe vocal Sarah")
+        .accessibilityIdentifier("sarah.voice.orb.expanded")
+        .onTapGesture {
+            // Toucher l'orbe pendant l'écoute NE coupe jamais le micro.
+            // Le bouton micro dédié gère explicitement la sourdine.
+            HapticService.shared.buttonTap()
+            if !viewModel.isContinuousConversationActive || viewModel.isVoiceMicrophoneMuted {
+                viewModel.startVoiceConversation()
+            }
+        }
+    }
+
+    // MARK: - Barre inférieure
+
+    private var composer: some View {
+        HStack(spacing: 10) {
+            Menu {
+                Button {
+                    HapticService.shared.buttonTap()
+                    selectedPhotoItem = nil
+                    isShowingPhotoPicker = true
+                } label: {
+                    Label("Photos", systemImage: "photo.on.rectangle.angled")
+                }
+
+                Button {
+                    HapticService.shared.buttonTap()
+                    isShowingCamera = true
+                } label: {
+                    Label("Appareil photo", systemImage: "camera")
+                }
+
+                Button {
+                    HapticService.shared.buttonTap()
+                    isShowingFileImporter = true
+                } label: {
+                    Label("Fichier", systemImage: "doc")
+                }
+            } label: {
+                ZStack {
+                    Circle()
+                        .fill(Color.white.opacity(0.10))
+                        .frame(width: 50, height: 50)
+                    Circle()
+                        .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                        .frame(width: 50, height: 50)
+                    Image(systemName: "plus")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundColor(.white)
+                }
+            }
+            .accessibilityLabel("Ajouter une photo, prendre une photo ou joindre un fichier")
+
+            HStack(spacing: 10) {
+                TextField("Demander à Sarah…", text: $viewModel.inputText)
+                    .foregroundColor(.white)
+                    .accentColor(accent)
+                    .font(.system(size: 16))
+                    .submitLabel(.send)
+                    .onSubmit {
+                        sendTextIfNeeded()
+                    }
+
+                if !viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                Button(action: {
+                    HapticService.shared.buttonTap()
+                    sendTextIfNeeded()
+                }) {
+                    Image(systemName: "arrow.up")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(accent)
+                        .frame(width: 36, height: 36)
+                        .background(Circle().fill(accent.opacity(0.11)))
+                }
+                .buttonStyle(PlainButtonStyle())
+                .accessibilityLabel("Envoyer")
+                }
+            }
+            .padding(.leading, 14)
+            .padding(.trailing, 7)
+            .frame(height: 52)
+            .background(
+                RoundedRectangle(cornerRadius: 26)
+                    .fill(Color.white.opacity(0.09))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 26)
+                    .stroke(Color.white.opacity(0.08), lineWidth: 1)
+            )
+
+            circleButton(
+                systemName: viewModel.isVoiceMicrophoneMuted ? "mic.slash.fill" : "mic.fill",
+                size: 50,
+                highlighted: viewModel.isContinuousConversationActive && !viewModel.isVoiceMicrophoneMuted
+            ) {
+                HapticService.shared.buttonTap()
+                viewModel.toggleMicrophone()
+            }
+        }
+    }
+
+    private func sendTextIfNeeded() {
+        let text = viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else { return }
+        viewModel.sendMessage(text)
+    }
+
+    private func circleButton(
+        systemName: String,
+        size: CGFloat = 48,
+        highlighted: Bool = false,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            ZStack {
+                Circle()
+                    .fill(highlighted ? accent.opacity(0.24) : Color.white.opacity(0.10))
+                    .frame(width: size, height: size)
+
+                Circle()
+                    .stroke(
+                        highlighted ? accent.opacity(0.44) : Color.white.opacity(0.08),
+                        lineWidth: 1
+                    )
+                    .frame(width: size, height: size)
+
+                Image(systemName: systemName)
+                    .font(.system(size: size * 0.34, weight: .semibold))
+                    .foregroundColor(highlighted ? accent : .white)
+            }
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}
+
+@available(iOS 15.0, *)
+private struct VoiceCameraPicker: UIViewControllerRepresentable {
+    let onImage: (UIImage?) -> Void
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onImage: onImage)
+    }
+
+    func makeUIViewController(context: Context) -> UIImagePickerController {
+        let picker = UIImagePickerController()
+        picker.sourceType = .camera
+        picker.delegate = context.coordinator
+        return picker
+    }
+
+    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
+
+    final class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
+        let onImage: (UIImage?) -> Void
+
+        init(onImage: @escaping (UIImage?) -> Void) {
+            self.onImage = onImage
+        }
+
+        func imagePickerController(
+            _ picker: UIImagePickerController,
+            didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]
+        ) {
+            onImage(info[.originalImage] as? UIImage)
+            picker.dismiss(animated: true)
+        }
+
+        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+            onImage(nil)
+            picker.dismiss(animated: true)
+        }
+    }
+}

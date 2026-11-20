@@ -1,0 +1,82 @@
+name: Local Agent LLM Android - Google Play production
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'android/**'
+      - '.github/workflows/saraiya-internal-play.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: saraiya-google-play-production
+  cancel-in-progress: false
+
+jobs:
+  sign-and-upload:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      ANDROID_HOME: /usr/local/lib/android/sdk
+      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Gradle 9.5
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.5.0'
+          cache-disabled: true
+      - name: Install Android SDK 36
+        run: '"$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;36.0.0"'
+      - name: Install Google Play API client
+        run: python -m pip install google-auth==2.40.3 requests==2.32.5
+      - name: Check publication transaction contract
+        run: python android/qa/test_google_play.py
+      - name: Choose unused Google Play version
+        id: play
+        env:
+          PLAY_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+        run: python android/scripts/google_play.py version
+      - name: Check and build Android bundle
+        env:
+          CODE: ${{ steps.play.outputs.code }}
+          VERSION: ${{ steps.play.outputs.version }}
+        run: |
+          set -euo pipefail
+          gradle -p android :app:assembleDebugAndroidTest :app:lintDebug :app:bundleRelease "-PplayVersionCode=${CODE}" "-PplayVersionName=${VERSION}" --stacktrace
+          test -s android/app/build/outputs/bundle/release/app-release.aab
+      - name: Sign with existing Google Play upload key
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          set -euo pipefail
+          : "${KEYSTORE:?ANDROID_UPLOAD_KEYSTORE_BASE64 missing}"
+          : "${STORE_PASSWORD:?ANDROID_STORE_PASSWORD missing}"
+          : "${KEY_PASSWORD:?ANDROID_KEY_PASSWORD missing}"
+          : "${ALIAS:?ANDROID_KEY_ALIAS missing}"
+          umask 077
+          key="$RUNNER_TEMP/local-agent-upload.keystore"
+          trap 'rm -f "$key"' EXIT
+          printf '%s' "$KEYSTORE" | base64 --decode > "$key"
+          jarsigner -keystore "$key" -storepass:env STORE_PASSWORD -keypass:env KEY_PASSWORD android/app/build/outputs/bundle/release/app-release.aab "$ALIAS"
+          jarsigner -verify android/app/build/outputs/bundle/release/app-release.aab
+      - name: Publish bundle, name, icon and phone screenshots
+        env:
+          PLAY_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          CODE: ${{ steps.play.outputs.code }}
+          VERSION: ${{ steps.play.outputs.version }}
+        run: python android/scripts/google_play.py publish --code "$CODE" --version "$VERSION"

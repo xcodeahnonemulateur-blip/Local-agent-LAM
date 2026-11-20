@@ -1,0 +1,50 @@
+name: Local Agent LLM - TestFlight signing readiness
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/testflight-signing-check.yml'
+permissions:
+  contents: read
+jobs:
+  check-signing:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Presence of Apple signing credentials (never print secret values)
+        env:
+          APPLE_TEAM_ID_SET: ${{ secrets.APPLE_TEAM_ID != '' }}
+          DISTRIBUTION_P12_SET: ${{ secrets.APPLE_DISTRIBUTION_CERTIFICATE_P12_BASE64 != '' }}
+          DISTRIBUTION_PASSWORD_SET: ${{ secrets.APPLE_DISTRIBUTION_CERTIFICATE_PASSWORD != '' }}
+          IPHONE_PROFILE_SET: ${{ secrets.APPLE_PROVISIONING_PROFILE_BASE64 != '' }}
+          WATCH_PROFILE_SET: ${{ secrets.APPLE_WATCH_PROVISIONING_PROFILE_BASE64 != '' }}
+          ASC_KEY_ID_SET: ${{ secrets.APP_STORE_CONNECT_KEY_ID != '' }}
+          ASC_ISSUER_SET: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID != '' }}
+          ASC_KEY_SET: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY != '' }}
+        run: |
+          set -euo pipefail
+          {
+            echo '## Local Agent LLM iPhone + Watch : TestFlight readiness'
+            echo ''
+            echo '| Élément | Présence pour les noms standards recherchés |'
+            echo '|---|---|'
+            echo "| Équipe Apple | $APPLE_TEAM_ID_SET |"
+            echo "| Certificat Apple Distribution (.p12) | $DISTRIBUTION_P12_SET |"
+            echo "| Mot de passe certificat | $DISTRIBUTION_PASSWORD_SET |"
+            echo "| Provisioning iPhone | $IPHONE_PROFILE_SET |"
+            echo "| Provisioning Watch | $WATCH_PROFILE_SET |"
+            echo "| App Store Connect Key ID | $ASC_KEY_ID_SET |"
+            echo "| App Store Connect Issuer ID | $ASC_ISSUER_SET |"
+            echo "| App Store Connect API key | $ASC_KEY_SET |"
+            echo ''
+            echo 'FALSE signifie uniquement : aucun des noms de secret recherchés n’est défini.'
+            echo 'Aucune valeur de clé, mot de passe ou certificat n’a été consultée ni imprimée.'
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "TEAM_ID=${APPLE_TEAM_ID_SET}; CERTIFICATE=${DISTRIBUTION_P12_SET}; P12_PASSWORD=${DISTRIBUTION_PASSWORD_SET}; IPHONE_PROFILE=${IPHONE_PROFILE_SET}; WATCH_PROFILE=${WATCH_PROFILE_SET}; ASC_ID=${ASC_KEY_ID_SET}; ASC_ISSUER=${ASC_ISSUER_SET}; ASC_KEY=${ASC_KEY_SET}"
+          echo 'Seuls des indicateurs true/false sont affichés, jamais les valeurs des secrets.'
+          for name in APPLE_TEAM_ID_SET DISTRIBUTION_P12_SET DISTRIBUTION_PASSWORD_SET IPHONE_PROFILE_SET WATCH_PROFILE_SET ASC_KEY_ID_SET ASC_ISSUER_SET ASC_KEY_SET; do
+            if [[ "${!name}" != true ]]; then
+              echo "::error::Missing Apple signing configuration: $name"
+              exit 1
+            fi
+          done

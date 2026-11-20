@@ -1,0 +1,80 @@
+appId: com.sarahia.app
+---
+# 1. Menu latéral
+- launchApp:
+    clearState: true
+- assertVisible: "Sarah"
+- tapOn:
+    id: "sarah.menu.button"
+- assertVisible:
+    id: "sarah.sidebar"
+- assertVisible: "Aucune discussion pour le moment."
+
+# 2. Recherche latérale : un seul tap doit suffire
+- tapOn: "Rechercher"
+# Touche la zone de saisie complète, y compris son icône.
+- tapOn:
+    id: "sarah.sidebar.search.field"
+- inputText: "test recherche"
+- assertVisible: "test recherche"
+
+# 3. Menu des agents
+- launchApp
+- assertVisible: "Sarah"
+- tapOn:
+    id: "sarah.agent.menu"
+- assertVisible: "Raphaël"
+- assertVisible: "Yohan"
+- assertVisible: "Ethel"
+
+# 4. Réglages accessibles depuis le menu latéral
+- launchApp
+- tapOn:
+    id: "sarah.menu.button"
+- tapOn:
+    id: "sarah.settings.button"
+- assertVisible: "Réglages"
+
+# 5. Bouton + et menu de pièces jointes
+- launchApp
+- tapOn:
+    id: "sarah.attachment.menu"
+- assertVisible: "Photos"
+- assertVisible: "Appareil photo"
+- assertVisible: "Fichier"
+
+# 6. Champ de saisie : un seul tap doit suffire
+- launchApp
+- tapOn:
+    id: "sarah.composer.field"
+- inputText: "test interaction SarahIA"
+- assertVisible: "test interaction SarahIA"
+- tapOn:
+    id: "sarah.composer.action"
+- assertVisible: "test interaction SarahIA"
+
+# 7. Mode vocal Sarah : premier appui puis réduction sans coupure du micro
+- launchApp
+- assertVisible: "Sarah"
+- tapOn:
+    id: "sarah.composer.action"
+- assertVisible:
+    id: "sarah.voice.minimize"
+- tapOn:
+    id: "sarah.voice.minimize"
+- assertVisible:
+    id: "sarah.voice.compactOrb"
+- assertVisible:
+    id: "sarah.voice.compactStop"
+# Rouvrir le plein écran ne crée pas une seconde session vocale.
+- tapOn:
+    id: "sarah.voice.compactOrb"
+- assertVisible:
+    id: "sarah.voice.minimize"
+# Stop est la seule action depuis le mini-orbe qui met fin à la voix.
+- tapOn:
+    id: "sarah.voice.minimize"
+- tapOn:
+    id: "sarah.voice.compactStop"
+- assertNotVisible:
+    id: "sarah.voice.compactOrb"

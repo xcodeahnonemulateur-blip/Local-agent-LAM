@@ -1,0 +1,146 @@
+name: Local Agent LLM iPhone and Watch to TestFlight
+on:
+  workflow_run:
+    workflows: ["iOS 27 Local AI Build"]
+    types: [completed]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  upload:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main')
+    runs-on: xcode-27
+    timeout-minutes: 60
+    env:
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      DIST_P12: ${{ secrets.APPLE_DISTRIBUTION_CERTIFICATE_P12_BASE64 }}
+      DIST_PASSWORD: ${{ secrets.APPLE_DISTRIBUTION_CERTIFICATE_PASSWORD }}
+      IPHONE_PROFILE: ${{ secrets.APPLE_PROVISIONING_PROFILE_BASE64 }}
+      WATCH_PROFILE: ${{ secrets.APPLE_WATCH_PROVISIONING_PROFILE_BASE64 }}
+      ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+      ASC_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+      GH_TOKEN: ${{ github.token }}
+      GH_EVENT_NAME: ${{ github.event_name }}
+      GH_SOURCE_CREATED_AT: ${{ github.event.workflow_run.created_at }}
+    steps:
+      - name: Require actual Apple Distribution and App Store Connect credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          MISSING=0
+          for NAME in APPLE_TEAM_ID DIST_P12 DIST_PASSWORD IPHONE_PROFILE WATCH_PROFILE ASC_KEY_ID ASC_ISSUER_ID ASC_KEY; do
+            if [ -z "$(printenv "$NAME")" ]; then
+              echo "::error::TestFlight bloque : credential absent $NAME (verifier le nom dans GitHub Secrets)"
+              MISSING=1
+            fi
+          done
+          if [ "$MISSING" -ne 0 ]; then exit 1; fi
+
+      - name: Download built iPhone IPA containing Apple Watch
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/sarahia"
+          gh release download sarah-ia-latest-fix --repo "$GITHUB_REPOSITORY" --pattern SarahIA.ipa --dir "$RUNNER_TEMP/sarahia" --clobber
+          test -s "$RUNNER_TEMP/sarahia/SarahIA.ipa"
+          if [ "$GH_EVENT_NAME" = workflow_run ]; then
+            ASSET_TIME="$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/sarah-ia-latest-fix" --jq '[.assets[] | select(.name == "SarahIA.ipa") | .updated_at] | first')"
+            if [ -z "$ASSET_TIME" ] || [[ "$ASSET_TIME" < "$GH_SOURCE_CREATED_AT" ]]; then
+              echo "::error::IPA de la release trop ancienne par rapport au nouveau build."
+              exit 1
+            fi
+          fi
+          cd "$RUNNER_TEMP/sarahia"
+          unzip -qq SarahIA.ipa
+          APP="$RUNNER_TEMP/sarahia/Payload/SarahIA.app"
+          WATCH="$APP/Watch/SarahiaWatch.app"
+          test -d "$WATCH"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Info.plist")" = com.localagentllm.apple
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$WATCH/Info.plist")" = com.localagentllm.apple.watchkitapp
+          test "$(plutil -extract WKCompanionAppBundleIdentifier raw "$WATCH/Info.plist")" = com.localagentllm.apple
+          test -s "$WATCH/Assets.car"
+          for BUNDLE in "$APP" "$WATCH"; do
+            test -x "$BUNDLE/$(plutil -extract CFBundleExecutable raw "$BUNDLE/Info.plist")"
+          done
+          for KEY in CFBundleShortVersionString CFBundleVersion; do
+            test "$(plutil -extract "$KEY" raw "$WATCH/Info.plist")" = "$(plutil -extract "$KEY" raw "$APP/Info.plist")"
+          done
+
+      - name: Import Apple Distribution certificate and both provisioning profiles
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          WORK="$RUNNER_TEMP/sarahia"
+          printf %s "$DIST_P12" | base64 -D > "$WORK/distribution.p12"
+          printf %s "$IPHONE_PROFILE" | base64 -D > "$WORK/iphone.mobileprovision"
+          printf %s "$WATCH_PROFILE" | base64 -D > "$WORK/watch.mobileprovision"
+          KEYCHAIN="$RUNNER_TEMP/sarahia-testflight.keychain-db"
+          PASSWORD="$(openssl rand -hex 20)"
+          printf '::add-mask::%s\n' "$PASSWORD"
+          security create-keychain -p "$PASSWORD" "$KEYCHAIN"
+          security unlock-keychain -p "$PASSWORD" "$KEYCHAIN"
+          security set-keychain-settings -lut 3600 "$KEYCHAIN"
+          security import "$WORK/distribution.p12" -k "$KEYCHAIN" -P "$DIST_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$PASSWORD" "$KEYCHAIN" >/dev/null
+          security list-keychains -d user -s "$KEYCHAIN"
+          IDENTITY="$(security find-identity -v -p codesigning "$KEYCHAIN" | grep 'Apple Distribution:' | head -n 1 | awk '{print $2}')"
+          test -n "$IDENTITY"
+          echo "SIGN_IDENTITY=$IDENTITY" >> "$GITHUB_ENV"
+          for TYPE in iphone watch; do
+            security cms -D -i "$WORK/$TYPE.mobileprovision" > "$WORK/$TYPE-profile.plist"
+            plutil -extract Entitlements xml1 -o "$WORK/$TYPE-entitlements.plist" "$WORK/$TYPE-profile.plist"
+            TEAM="$(/usr/libexec/PlistBuddy -c 'Print :TeamIdentifier:0' "$WORK/$TYPE-profile.plist")"
+            if [ "$TEAM" != "$APPLE_TEAM_ID" ]; then
+              echo "::error::Le profil $TYPE est associe a une autre equipe Apple."
+              exit 1
+            fi
+          done
+
+      - name: Sign iPhone and embedded Apple Watch with matching profiles
+        shell: bash
+        run: |
+          set -euo pipefail
+          WORK="$RUNNER_TEMP/sarahia"
+          APP="$WORK/Payload/SarahIA.app"
+          WATCH="$APP/Watch/SarahiaWatch.app"
+          cp "$WORK/iphone.mobileprovision" "$APP/embedded.mobileprovision"
+          cp "$WORK/watch.mobileprovision" "$WATCH/embedded.mobileprovision"
+          for BUNDLE in "$WATCH" "$APP"; do
+            if [ -d "$BUNDLE/Frameworks" ]; then
+              find "$BUNDLE/Frameworks" -name '*.framework' -type d -print0 | while IFS= read -r -d '' F; do
+                codesign -f -s "$SIGN_IDENTITY" --timestamp=none "$F"
+              done
+              find "$BUNDLE/Frameworks" -name '*.dylib' -type f -print0 | while IFS= read -r -d '' F; do
+                codesign -f -s "$SIGN_IDENTITY" --timestamp=none "$F"
+              done
+            fi
+          done
+          if [ -d "$APP/PlugIns" ]; then echo "::error::Profils manquants pour des extensions iOS"; exit 1; fi
+          codesign -f -s "$SIGN_IDENTITY" --timestamp=none --entitlements "$WORK/watch-entitlements.plist" "$WATCH"
+          codesign -f -s "$SIGN_IDENTITY" --timestamp=none --entitlements "$WORK/iphone-entitlements.plist" "$APP"
+          codesign --verify --deep --strict "$APP"
+          cd "$WORK"
+          zip -qry -0 LocalAgentLLM-TestFlight.ipa Payload
+          test -s LocalAgentLLM-TestFlight.ipa
+
+      - name: Upload signed iPhone and Apple Watch build to TestFlight
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p "$HOME/.appstoreconnect/private_keys"
+          KEY_FILE="$HOME/.appstoreconnect/private_keys/AuthKey_$ASC_KEY_ID.p8"
+          trap 'rm -f "$KEY_FILE"' EXIT
+          if printf '%s' "$ASC_KEY" | grep -q "BEGIN PRIVATE KEY"; then
+            printf %s "$ASC_KEY" > "$KEY_FILE"
+          else
+            printf %s "$ASC_KEY" | base64 -D > "$KEY_FILE"
+          fi
+          chmod 600 "$KEY_FILE"
+          xcrun altool --upload-app --type ios             --file "$RUNNER_TEMP/sarahia/LocalAgentLLM-TestFlight.ipa"             --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
+          echo 'Envoi accepte par App Store Connect ; attendre la validation Apple puis activer les testeurs.' >> "$GITHUB_STEP_SUMMARY"

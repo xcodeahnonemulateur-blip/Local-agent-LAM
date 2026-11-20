@@ -1,0 +1,257 @@
+name: iOS Simulator UI Smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, work/sarah-final-ui-audit-20261019]
+    paths:
+      - 'SarahIA/**'
+      - '.maestro/**'
+      - '.github/workflows/ios-simulator-ui-smoke.yml'
+      - '.github/scripts/inject_ui_test_ids.py'
+
+concurrency:
+  group: sarahia-ios-simulator-ui-smoke
+  cancel-in-progress: true
+
+jobs:
+  simulator-ui:
+    runs-on: xcode-27
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore missing website voice bridge before compiling
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/restore_website_voice_bridge.py
+          grep -q 'public func speakWebsiteGuide(' SarahIA/SarahIA/ViewModels/ChatViewModel.swift
+          grep -q 'public func speakWebsiteGuideSequence(' SarahIA/SarahIA/ViewModels/ChatViewModel.swift
+          grep -q 'public func cancelWebsiteGuideSpeech()' SarahIA/SarahIA/ViewModels/ChatViewModel.swift
+          grep -q 'public func speakSequence(' SarahIA/SarahIA/Services/MultiAgentVoiceManager.swift
+
+
+      - name: Verify canonical Sarah voice runtime
+        run: |
+          set -euo pipefail
+          grep -q '^import whisper' SarahIA/SarahIA/Services/WhisperService.swift
+          grep -q 'whisper_full' SarahIA/SarahIA/Services/WhisperService.swift
+          grep -q 'public func prepareModel()' SarahIA/SarahIA/Services/WhisperService.swift
+          grep -q 'input.inputFormat(forBus: 0)' SarahIA/SarahIA/Services/WhisperService.swift
+          grep -q 'maximumUtteranceSeconds' SarahIA/SarahIA/Services/WhisperService.swift
+          grep -q 'flashAttention: false' SarahIA/SarahIA/Services/WhisperService.swift
+          grep -q 'WhisperService.shared' SarahIA/SarahIA/Services/AppleSpeechRecognizer.swift
+          grep -q 'stopListeningAndTranscribe' SarahIA/SarahIA/Views/MessageBar.swift
+          grep -q 'suppressNextExternalFinalCallback' SarahIA/SarahIA/Services/AppleSpeechRecognizer.swift
+          grep -q 'beginContinuousVoiceSession()' SarahIA/SarahIA/ViewModels/ChatViewModel.swift
+          grep -q 'endContinuousVoiceSession()' SarahIA/SarahIA/ViewModels/ChatViewModel.swift
+          grep -q 'mode: .voiceChat' SarahIA/SarahIA/Services/AudioSessionManager.swift
+          ! grep -A6 'mode: .voiceChat' SarahIA/SarahIA/Services/AudioSessionManager.swift | grep -q 'allowBluetoothA2DP'
+          grep -q 'presentationDetents' SarahIA/SarahIA/ContentView.swift
+          echo 'Canonical Sarah voice runtime verified without legacy source migrations'
+
+      - name: Inject simulator accessibility identifiers
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/inject_ui_test_ids.py
+
+      - name: Replace Whisper only for simulator UI testing
+        run: |
+          cat > SarahIA/SarahIA/Services/WhisperService.swift <<'SWIFT'
+          import Foundation
+          import AVFoundation
+          import Combine
+
+          @available(iOS 13.0, *)
+          public final class WhisperService: ObservableObject {
+              public static let shared = WhisperService()
+
+              @Published public private(set) var isRecording = false
+              @Published public private(set) var isTranscribing = false
+              @Published public private(set) var currentText = ""
+              @Published public private(set) var micEnergyLevel: Float = 0
+              @Published public private(set) var isModelReady = true
+              @Published public private(set) var isModelLoading = false
+              @Published public private(set) var lastError: String? = nil
+
+              public var onPartialTranscription: ((String) -> Void)?
+              public var onFinalTranscription: ((String) -> Void)?
+              public var onVoiceActivity: (() -> Void)?
+
+              private init() {}
+
+              public func prepareModel() {
+                  isModelLoading = false
+                  isModelReady = true
+              }
+
+              public func requestAuthorization(completion: @escaping (Bool) -> Void) {
+                  DispatchQueue.main.async { completion(true) }
+              }
+
+              public func startRecording(autoFinalizeOnSilence: Bool = true) {
+                  currentText = ""
+                  micEnergyLevel = 0
+                  lastError = nil
+                  isTranscribing = false
+                  isRecording = true
+              }
+
+              public func stopRecordingAndTranscribe(completion: ((String?) -> Void)? = nil) {
+                  isRecording = false
+                  isTranscribing = false
+                  micEnergyLevel = 0
+                  completion?(currentText.isEmpty ? nil : currentText)
+              }
+
+              public func stopRecordingWithoutTranscription() {
+                  isRecording = false
+                  isTranscribing = false
+                  micEnergyLevel = 0
+              }
+
+              public func startTranscription() { startRecording() }
+              public func stopTranscription() { stopRecordingAndTranscribe() }
+              public func appendAudioBuffer(_ buffer: AVAudioPCMBuffer) {}
+
+              public func reset() {
+                  isRecording = false
+                  isTranscribing = false
+                  currentText = ""
+                  micEnergyLevel = 0
+                  lastError = nil
+              }
+          }
+          SWIFT
+
+      - name: Build SarahIA for iOS Simulator
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -project SarahIA/SarahIA.xcodeproj \
+            -scheme SarahIA \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$GITHUB_WORKSPACE/DerivedDataSimulator" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            SWIFT_TREAT_WARNINGS_AS_ERRORS=NO \
+            build 2>&1 | tee "$GITHUB_WORKSPACE/simulator-build.log"
+          APP_PATH=$(find "$GITHUB_WORKSPACE/DerivedDataSimulator" -name 'SarahIA.app' -type d | head -n 1)
+          test -n "$APP_PATH"
+          echo "APP_PATH=$APP_PATH" >> "$GITHUB_ENV"
+
+      - name: Create, boot and launch a fresh iPhone Simulator
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, re, subprocess, time
+
+          def run(cmd, timeout=None, check=True):
+              print('+', ' '.join(cmd), flush=True)
+              return subprocess.run(cmd, check=check, timeout=timeout, capture_output=True, text=True)
+
+          runtimes_data = json.loads(subprocess.check_output(['xcrun', 'simctl', 'list', 'runtimes', '--json']))
+          runtimes = []
+          for runtime in runtimes_data.get('runtimes', []):
+              identifier = runtime.get('identifier', '')
+              if 'iOS' not in identifier or not runtime.get('isAvailable', True):
+                  continue
+              version_text = runtime.get('version') or runtime.get('name', '')
+              numbers = tuple(int(x) for x in re.findall(r'\d+', version_text)[:3])
+              runtimes.append((numbers, identifier, runtime.get('name', identifier)))
+
+          if not runtimes:
+              raise SystemExit('No available iOS simulator runtime')
+
+          runtimes.sort(reverse=True)
+          _, runtime_id, runtime_name = runtimes[0]
+          print(f'Using fresh runtime: {runtime_name} ({runtime_id})', flush=True)
+
+          device_data = json.loads(subprocess.check_output(['xcrun', 'simctl', 'list', 'devicetypes', '--json']))
+          iphone_types = [d for d in device_data.get('devicetypes', []) if d.get('name', '').startswith('iPhone')]
+          preferred_names = ['iPhone 17 Pro', 'iPhone 17', 'iPhone 16 Pro', 'iPhone 16', 'iPhone 15 Pro', 'iPhone 15', 'iPhone 14 Pro', 'iPhone 14']
+          iphone_types.sort(key=lambda d: (preferred_names.index(d['name']) if d.get('name') in preferred_names else 999, d.get('name', '')))
+
+          udid = None
+          last_error = None
+          for device_type in iphone_types:
+              try:
+                  created = run(['xcrun', 'simctl', 'create', f"SarahIA-CI-{os.environ.get('GITHUB_RUN_ID', 'local')}", device_type['identifier'], runtime_id], timeout=30)
+                  candidate = created.stdout.strip()
+                  if candidate:
+                      udid = candidate
+                      break
+              except Exception as exc:
+                  last_error = exc
+
+          if not udid:
+              raise SystemExit(f'Unable to create a fresh iPhone simulator: {last_error}')
+
+          try:
+              run(['xcrun', 'simctl', 'boot', udid], timeout=40, check=False)
+              run(['xcrun', 'simctl', 'bootstatus', udid, '-b'], timeout=240)
+              run(['xcrun', 'simctl', 'install', udid, os.environ['APP_PATH']], timeout=240)
+              launched = run(['xcrun', 'simctl', 'launch', udid, 'com.sarahia.app'], timeout=150)
+              print(launched.stdout.strip(), flush=True)
+              time.sleep(4)
+          except Exception:
+              try:
+                  run(['xcrun', 'simctl', 'shutdown', udid], timeout=45, check=False)
+              except subprocess.TimeoutExpired:
+                  print('Simulator shutdown exceeded 45 seconds', flush=True)
+              raise
+
+          with open(os.environ['GITHUB_ENV'], 'a') as env:
+              env.write(f'SIM_UDID={udid}\n')
+          PY
+
+      - name: Install Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install Maestro CLI
+        run: |
+          set -euo pipefail
+          curl -fsSL 'https://get.maestro.mobile.dev' | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+      - name: Tap and verify SarahIA controls
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.maestro/bin:$PATH"
+          mkdir -p ui-smoke-artifacts
+          maestro --version
+          # Sur les runners Xcode 27, le pilote XCTest démarre parfois lentement.
+          export MAESTRO_DRIVER_STARTUP_TIMEOUT=300000
+          maestro test .maestro/ui-smoke.yaml 2>&1 | tee ui-smoke-artifacts/maestro.log
+
+      - name: Capture final simulator screenshot
+        if: always()
+        run: |
+          mkdir -p ui-smoke-artifacts
+          if [ -n "${SIM_UDID:-}" ]; then
+            xcrun simctl io "$SIM_UDID" screenshot ui-smoke-artifacts/final.png || true
+          fi
+          cp simulator-build.log ui-smoke-artifacts/ 2>/dev/null || true
+
+      - name: Upload UI smoke artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: SarahIA-simulator-ui-smoke
+          path: ui-smoke-artifacts
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Remove temporary simulator
+        if: always()
+        run: |
+          if [ -n "${SIM_UDID:-}" ]; then
+            xcrun simctl shutdown "$SIM_UDID" || true
+            xcrun simctl delete "$SIM_UDID" || true
+          fi

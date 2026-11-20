@@ -1,0 +1,35 @@
+name: Sarahia Watch 1.0.0 - watchOS build
+on:
+  workflow_dispatch:
+  push:
+    branches: [feat/sarahia-watch-1.0.0]
+    paths:
+      - 'SarahIA/SarahiaWatch/**'
+      - 'SarahIA/SarahIA.xcodeproj/project.pbxproj'
+      - '.github/workflows/sarah-watch-1-0.yml'
+  pull_request:
+    paths:
+      - 'SarahIA/SarahiaWatch/**'
+      - 'SarahIA/SarahIA.xcodeproj/project.pbxproj'
+      - '.github/workflows/sarah-watch-1-0.yml'
+permissions:
+  contents: read
+jobs:
+  watch:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Xcode version
+        run: xcodebuild -version && xcodebuild -showsdks
+      - name: Parse iPhone integration Swift syntax
+        run: |
+          xcrun swiftc -frontend -parse             SarahIA/SarahIA/Services/SarahWatchBridge.swift             SarahIA/SarahIA/Services/LiveTranslationSession.swift             SarahIA/SarahIA/Views/LiveTranslationView.swift             SarahIA/SarahIA/SarahIAApp.swift             SarahIA/SarahIA/Views/ChatScreenView.swift
+          plutil -lint SarahIA/SarahIA/Info.plist
+      - name: Compile Watch simulator app
+        run: |
+          set -o pipefail
+          xcodebuild -project SarahIA/SarahIA.xcodeproj -target SarahiaWatch \
+            -configuration Debug -sdk watchsimulator CODE_SIGNING_ALLOWED=NO \
+            build 2>&1 | tee watch-build.log
+      # Journaux disponibles dans Actions > Run, sans consommation d'artefacts.

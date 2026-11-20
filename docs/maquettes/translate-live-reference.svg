@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1350" height="720" viewBox="0 0 1350 720">
+<defs><linearGradient id="a" x2="0" y2="1"><stop stop-color="#080b16"/><stop offset="1" stop-color="#0b1d40"/></linearGradient><linearGradient id="b" x2="0" y2="1"><stop stop-color="#00347c"/><stop offset="1" stop-color="#0c64b7"/></linearGradient></defs>
+<rect width="1350" height="720" rx="72" fill="#11172f"/><rect x="18" y="18" width="1314" height="684" rx="58" fill="#040a16" stroke="#7286ad" stroke-width="6"/>
+<text x="70" y="93" font-family="Arial,sans-serif" font-size="35" fill="#fff">‹  ∞  Sarahia</text><rect x="560" y="44" width="210" height="58" rx="29" fill="#310e28" stroke="#d74670"/><text x="607" y="85" font-family="Arial" font-size="32" fill="#ff7493">● LIVE</text>
+<rect x="65" y="133" width="1220" height="237" rx="29" fill="url(#a)"/><text x="104" y="184" font-family="Arial" font-size="29" fill="#c8d8fa">🇫🇷 FRANÇAIS</text><text x="675" y="300" text-anchor="middle" font-family="Arial" font-size="119" font-weight="bold" fill="white">Bonjour</text>
+<rect x="65" y="372" width="1220" height="236" rx="29" fill="url(#b)"/><text x="105" y="424" font-family="Arial" font-size="29" fill="#d9eaff">🇮🇱 HÉBREU</text><text x="675" y="553" text-anchor="middle" direction="rtl" font-family="Arial" font-size="140" font-weight="bold" fill="white">שלום</text>
+<text x="103" y="660" font-family="Arial" font-size="26" fill="#bed0f2">⌨</text><circle cx="675" cy="643" r="48" fill="#462db2" stroke="#49baff" stroke-width="6"/><text x="675" y="655" text-anchor="middle" font-family="Arial" font-size="41" fill="white">🎙</text><text x="1190" y="658" font-family="Arial" font-size="29" fill="#bed0f2">🔊</text>
+</svg>

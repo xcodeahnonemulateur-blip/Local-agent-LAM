@@ -1,0 +1,87 @@
+name: Nettoyage des anciennes IPA
+
+# Manuel (SUPPRIMER) ou déclenché après publication réussie de l'IPA complète.
+# Vérifie la taille du livrable canonique avant de supprimer les anciennes releases.
+# Les commits et l'historique de code sont conservés.
+# Au premier push du workflow, seules les anciennes releases < 1 Go sont supprimées.
+# Après une compilation complète réussie, une seule release officielle reste.
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/cleanup-releases.yml'
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Tape SUPPRIMER pour confirmer (action définitive)'
+        required: true
+        default: ''
+      keep_releases:
+        description: 'Tags des releases à garder (séparés par des espaces)'
+        required: false
+        default: 'sarah-ia-latest-fix sarah-engine-v1'
+  workflow_run:
+    workflows: ["iOS 27 Local AI Build"]
+    types: [completed]
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  cleanup:
+    if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.confirm == 'SUPPRIMER') || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'main' || github.event.workflow_run.head_branch == 'feature/sarah-watch-live-he-fr')) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO: ${{ github.repository }}
+      KEEP: ${{ (github.event_name == 'workflow_dispatch' && inputs.keep_releases) || 'sarah-ia-latest-fix sarah-engine-v1' }}
+    steps:
+      - name: Supprimer les releases (sauf celles à garder) et leurs tags
+        run: |
+          set -euo pipefail
+          full_size=$(gh api "repos/$REPO/releases/tags/sarah-ia-latest-fix" --jq '[.assets[].size] | max // 0')
+          engine_size=$(gh api "repos/$REPO/releases/tags/sarah-engine-v1" --jq '[.assets[] | select(.name == "Qwen3-1.7B-Q4_K_M.gguf") | .size] | max // 0')
+          if [ "$full_size" -lt 5000000 ] || [ "$engine_size" -lt 1000000000 ]; then
+            echo "Refus du nettoyage : IPA canonique ou sauvegarde Sarah Engine manquante."
+            exit 1
+          fi
+          # Sarah Engine est un paquet de ressources, pas une ancienne IPA.
+          # Ne jamais supprimer les modèles conservés sur GitHub.
+          KEEP="sarah-ia-latest-fix sarah-engine-v1 $KEEP"
+          deleted=0
+          gh api --paginate "repos/$REPO/releases?per_page=100" \
+            --jq '.[] | "\(.id) \(.tag_name) \([.assets[].size] | max // 0)"' > releases.txt
+          while read -r id tag size; do
+            if [[ " $KEEP " == *" $tag "* ]]; then
+              echo "Gardée : $tag"
+              continue
+            fi
+            if [ "$GITHUB_EVENT_NAME" = "push" ] && [ "$size" -ge 1000000000 ]; then
+              echo "Conservée pour consolidation (>= 1 Go) : $tag"
+              continue
+            fi
+            if gh api -X DELETE "repos/$REPO/releases/$id" --silent; then
+              gh api -X DELETE "repos/$REPO/git/refs/tags/$tag" --silent || true
+              deleted=$((deleted + 1))
+            else
+              echo "Échec : $tag"
+            fi
+          done < releases.txt
+          echo "Releases supprimées : $deleted"
+
+      - name: Supprimer les anciennes IPA de test, garder le build réussi
+        if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'
+        run: |
+          set -euo pipefail
+          SUCCESS_RUN='${{ github.event.workflow_run.id }}'
+          gh api --paginate "repos/$REPO/actions/artifacts?per_page=100" \
+            --jq '.artifacts[] | select(.name == "SarahIA-IPA") | [.id, (.workflow_run.id // 0)] | @tsv' > artifacts.txt
+          deleted=0
+          while read -r artifact_id run_id; do
+            [ "$run_id" = "$SUCCESS_RUN" ] && continue
+            gh api -X DELETE "repos/$REPO/actions/artifacts/$artifact_id" --silent || continue
+            deleted=$((deleted + 1))
+          done < artifacts.txt
+          echo "Anciennes IPA temporaires supprimées : $deleted"

@@ -1,0 +1,9 @@
+.gradle-local/
+.gradle/
+app/build/
+build/
+local.properties
+.idea/
+__pycache__/
+qa/bridge-run*/
+qa/*.cjs

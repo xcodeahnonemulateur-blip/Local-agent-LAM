@@ -1,0 +1,66 @@
+name: Publish Local Agent to Google Play
+on:
+  workflow_dispatch:
+    inputs:
+      version_code:
+        description: Unused Play version code, higher than every previous release
+        required: true
+        type: string
+      version_name:
+        description: Public version name
+        required: true
+        type: string
+      track:
+        description: Google Play release track
+        type: choice
+        options: [internal, production]
+permissions:
+  contents: read
+concurrency:
+  group: local-agent-google-play
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.5.0'
+          cache-disabled: true
+      - name: Build release bundle
+        env:
+          CODE: ${{ inputs.version_code }}
+          VERSION: ${{ inputs.version_name }}
+        run: |
+          [[ "$CODE" =~ ^[1-9][0-9]{0,9}$ && "$CODE" -le 2100000000 ]]
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'platforms;android-36' 'build-tools;36.0.0'
+          gradle -p android :app:bundleRelease "-PplayVersionCode=$CODE" "-PplayVersionName=$VERSION"
+      - name: Sign with the registered upload key
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          umask 077
+          key="$RUNNER_TEMP/upload.keystore"
+          trap 'rm -f "$key"' EXIT
+          printf '%s' "$KEYSTORE" | base64 --decode > "$key"
+          jarsigner -keystore "$key" -storepass:env STORE_PASSWORD -keypass:env KEY_PASSWORD android/app/build/outputs/bundle/release/app-release.aab "$ALIAS"
+      - name: Send signed bundle to Local Agent
+        uses: r0adkll/upload-google-play@eb49699984a39f23558439581660aa6f088acfd6
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.nathandev.localagent
+          releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
+          track: ${{ inputs.track }}
+          status: completed

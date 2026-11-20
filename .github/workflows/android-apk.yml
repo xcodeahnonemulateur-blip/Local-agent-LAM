@@ -1,0 +1,63 @@
+name: Android APK and AAB preview
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'android/**'
+      - '.github/workflows/android-apk.yml'
+  push:
+    branches:
+      - main
+      - android-bootstrap
+      - feature/sarah-android-native-20261109
+    paths:
+      - 'android/**'
+      - '.github/workflows/android-apk.yml'
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      ANDROID_HOME: /usr/local/lib/android/sdk
+      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.5.0'
+      - name: Install Android SDK
+        run: |
+          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" 'platform-tools' 'platforms;android-36' 'build-tools;36.0.0'
+      - name: Build test APK and unsigned release AAB
+        working-directory: android
+        run: gradle :app:assembleDebug :app:bundleRelease --stacktrace
+      - name: Save preview binaries with informative names
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk Sarah-Android-0.2.0-debug.apk
+          cp android/app/build/outputs/bundle/release/app-release.aab Sarah-Android-0.2.0-UNSIGNED.aab
+      - name: Publish private GitHub preview release (does not deploy to Google Play)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/feature/sarah-android-native-20261109'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG=sarah-android-0.2.0-preview
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" Sarah-Android-0.2.0-debug.apk Sarah-Android-0.2.0-UNSIGNED.aab --clobber
+          else
+            gh release create "$TAG" Sarah-Android-0.2.0-debug.apk Sarah-Android-0.2.0-UNSIGNED.aab --target "$GITHUB_SHA" --prerelease --title "Sarah Android 0.2.0 (test)" --notes "APK installable uniquement comme application .debug, AAB release non signé : ne pas envoyer sur Google Play. Whisper et la synchro PC ne sont pas encore intégrés."
+          fi
+      - name: Explain preview artifact location
+        run: echo "The debug APK is delivered through the private GitHub prerelease on the preview branch, not GitHub Actions artifacts (storage quota reached)."

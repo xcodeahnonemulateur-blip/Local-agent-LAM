@@ -1,0 +1,76 @@
+# Xcode
+*.xcuserdata/
+*.xcscmblueprint
+*.xccheckout
+DerivedData/
+build/
+
+# Local Apple signing materials
+*.p8
+*.p12
+*.mobileprovision
+*.provisionprofile
+distribution.cer
+*.moved-aside
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+
+# Node
+node_modules/
+package-lock.json
+
+# Build output
+dist/
+*.ipa
+*.apk
+
+# macOS
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Gradle & Android Build
+.gradle/
+build/
+android/.gradle/
+android/build/
+android/app/build/
+*.hprof
+local.properties
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Test & Temp files
+test.txt
+*.tmp
+*.log
+*.ps1
+xcode_errors.txt
+
+# Sarah IA - generated QA reports and simulator output
+QA-DerivedData/
+qa-artifacts/
+ui-smoke-artifacts/
+*.xcresult/
+*.xcarchive/
+*.xcactivitylog
+
+# Local AI model binaries: downloaded by CI, never committed to Git
+*.gguf
+ggml-*.bin
+*.onnx
+models-cache/
