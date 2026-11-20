@@ -66,9 +66,15 @@
 		<string>fetch</string>
 	</array>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Sarah IA utilise le microphone pour le mode vocal et transcrit votre voix localement sur l’iPhone avec OpenAI Whisper.</string>
+	<string>Local Agent LLM utilise le microphone pour le mode vocal et transcrit votre voix sur l’iPhone avec OpenAI Whisper.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>Sarah IA effectue la transcription vocale avec le modèle OpenAI Whisper intégré à l’application, sans envoyer votre voix à un service de transcription en ligne.</string>
+	<string>Local Agent LLM utilise la reconnaissance vocale pour transcrire les paroles que vous dictez.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Local Agent LLM utilise l’appareil photo pour joindre les images que vous prenez à une conversation.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Local Agent LLM accède à la photothèque pour joindre les photos que vous choisissez à une conversation.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Local Agent LLM utilise votre position pour afficher la météo de votre localisation.</string>
 	<!-- Vérifier les applications de navigation installées avant de proposer le navigateur web. -->
 	<key>LSApplicationQueriesSchemes</key>
 	<array>

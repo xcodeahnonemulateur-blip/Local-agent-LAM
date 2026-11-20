@@ -17,6 +17,7 @@
 		A1B2C3D40001000100000009 /* TypingIndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000009 /* TypingIndicatorView.swift */; };
 		A1B2C3D4000100010000000B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000200010000000B /* Assets.xcassets */; };
 		A1B2C3D4000100010000000D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4000200010000000D /* LaunchScreen.storyboard */; };
+		D10000000000000000000014 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D10000000000000000000015 /* PrivacyInfo.xcprivacy */; };
 		A1B2C3D40001000100000010 /* StorageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000010 /* StorageService.swift */; };
 		A1B2C3D40001000100000011 /* AudioEngineManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000011 /* AudioEngineManager.swift */; };
 		A1B2C3D40001000100000012 /* WhisperService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000100000012 /* WhisperService.swift */; };
@@ -125,6 +126,7 @@ D1000000000000000000000D /* PBXContainerItemProxy */ = {isa = PBXContainerItemPr
 		A1B2C3D4000200010000000A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A1B2C3D4000200010000000B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A1B2C3D4000200010000000D /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
+		D10000000000000000000015 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		A1B2C3D4000200010000000C /* SarahIA.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SarahIA.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1B2C3D40002000100000010 /* StorageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageService.swift; sourceTree = "<group>"; };
 		A1B2C3D40002000100000011 /* AudioEngineManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioEngineManager.swift; sourceTree = "<group>"; };
@@ -248,6 +250,7 @@ D10000000000000000000007 /* SarahiaWatch */,
 				A1B2C3D40004000100000006 /* ViewModels */,
 				A1B2C3D4000200010000000B /* Assets.xcassets */,
 				A1B2C3D4000200010000000D /* LaunchScreen.storyboard */,
+				D10000000000000000000015 /* PrivacyInfo.xcprivacy */,
 				A1B2C3D4000200010000000A /* Info.plist */,
 			);
 			path = SarahIA;
@@ -455,6 +458,7 @@ D1000000000000000000000C /* Resources Watch */ = {isa = PBXResourcesBuildPhase; 
 			files = (
 				A1B2C3D4000100010000000B /* Assets.xcassets in Resources */,
 				A1B2C3D4000100010000000D /* LaunchScreen.storyboard in Resources */,
+				D10000000000000000000014 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
