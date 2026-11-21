@@ -1,0 +1,43 @@
+name: App Store - Build testé
+run-name: 'App Store iOS ${{ inputs.app_version }} (${{ inputs.build_number }}) - ${{ inputs.submit_for_review && ''App Review'' || ''Brouillon'' }}'
+on:
+  workflow_dispatch:
+    inputs:
+      app_version:
+        description: 'Version iOS testée (par exemple 3.1.0)'
+        type: string
+        required: true
+      build_number:
+        description: 'Numéro du build testé sur TestFlight'
+        type: string
+        required: true
+      submit_for_review:
+        description: 'Envoyer ce build testé à App Review et publier après approbation'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: local-agent-llm-app-store-draft
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Préparer le build et soumettre si demandé
+        env:
+          ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          ASC_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+          APP_VERSION: ${{ inputs.app_version }}
+          BUILD_NUMBER: ${{ inputs.build_number }}
+          SUBMIT_FOR_REVIEW: ${{ inputs.submit_for_review }}
+        run: node .github/scripts/prepare-app-store.mjs

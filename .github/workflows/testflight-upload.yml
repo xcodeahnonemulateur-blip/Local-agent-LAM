@@ -4,13 +4,23 @@ on:
     workflows: ["iOS 27 Local AI Build"]
     types: [completed]
   workflow_dispatch:
+    inputs:
+      build_number:
+        description: 'Numéro exact du build iPhone et Watch dans la release GitHub'
+        type: string
+        required: true
 permissions:
   contents: read
+concurrency:
+  group: local-agent-llm-testflight-upload
+  cancel-in-progress: false
 jobs:
   upload:
     if: >-
-      github.event_name == 'workflow_dispatch' ||
-      (github.event.workflow_run.conclusion == 'success' &&
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_repository.full_name == github.repository &&
        github.event.workflow_run.head_branch == 'main')
     runs-on: xcode-27
     timeout-minutes: 60
@@ -26,6 +36,8 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       GH_EVENT_NAME: ${{ github.event_name }}
       GH_SOURCE_CREATED_AT: ${{ github.event.workflow_run.created_at }}
+      GH_SOURCE_RUN_NUMBER: ${{ github.event.workflow_run.run_number }}
+      REQUESTED_BUILD_NUMBER: ${{ inputs.build_number }}
     steps:
       - name: Require actual Apple Distribution and App Store Connect credentials
         shell: bash
@@ -59,6 +71,20 @@ jobs:
           APP="$RUNNER_TEMP/sarahia/Payload/SarahIA.app"
           WATCH="$APP/Watch/SarahiaWatch.app"
           test -d "$WATCH"
+          if [ "$GH_EVENT_NAME" = workflow_run ]; then
+            [[ "$GH_SOURCE_RUN_NUMBER" =~ ^[1-9][0-9]*$ ]]
+            # Match the build number assigned by ios-build.yml.
+            EXPECTED_BUILD_NUMBER=$((1100 + GH_SOURCE_RUN_NUMBER))
+          else
+            [[ "$REQUESTED_BUILD_NUMBER" =~ ^[1-9][0-9]*$ ]]
+            EXPECTED_BUILD_NUMBER="$REQUESTED_BUILD_NUMBER"
+          fi
+          ACTUAL_BUILD_NUMBER="$(plutil -extract CFBundleVersion raw "$APP/Info.plist")"
+          if [ "$ACTUAL_BUILD_NUMBER" != "$EXPECTED_BUILD_NUMBER" ]; then
+            echo "::error::IPA incompatible avec le build demandé : build attendu $EXPECTED_BUILD_NUMBER."
+            exit 1
+          fi
+          echo "Build iPhone et Apple Watch sélectionné : $EXPECTED_BUILD_NUMBER" >> "$GITHUB_STEP_SUMMARY"
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Info.plist")" = com.localagentllm.apple
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$WATCH/Info.plist")" = com.localagentllm.apple.watchkitapp
           test "$(plutil -extract WKCompanionAppBundleIdentifier raw "$WATCH/Info.plist")" = com.localagentllm.apple
