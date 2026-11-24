@@ -58,6 +58,38 @@ export async function assertFranceOnly(request) {
   }
 }
 
+// Explicit territory-only operation, never submits a build or changes pricing.
+export async function restrictToFrance(request, { apply = false } = {}) {
+  const app = (await request(`apps/${appId}`)).data;
+  if (app?.attributes?.bundleId !== bundleId) throw new Error('Application Apple inattendue.');
+  const availability = (await request(`apps/${appId}/appAvailabilityV2`)).data;
+  if (!availability?.id) throw new Error('Disponibilité Apple introuvable.');
+  if (availability.attributes?.availableInNewTerritories !== false) {
+    throw new Error('Désactive d’abord l’ajout automatique des nouveaux pays dans App Store Connect. Aucun pays modifié.');
+  }
+  const snapshot = await request(`v2/appAvailabilities/${encodeURIComponent(availability.id)}/territoryAvailabilities?include=territory&limit=200`);
+  const rows = snapshot.data;
+  if (snapshot.links?.next || !Array.isArray(rows) || !rows.length ||
+      rows.some(row => row.type !== 'territoryAvailabilities' || !row.id ||
+        typeof row.attributes?.available !== 'boolean' ||
+        row.relationships?.territory?.data?.type !== 'territories' ||
+        !row.relationships.territory.data.id)) throw new Error('Liste des territoires incomplète.');
+  const countries = rows.map(row => row.relationships.territory.data.id);
+  if (new Set(countries).size !== countries.length || !countries.includes('FRA')) throw new Error('Liste des territoires ambiguë.');
+  const changed = rows.filter(row => row.attributes.available !== (row.relationships.territory.data.id === 'FRA'));
+  if (!apply) return { mode: 'preview', changeCount: changed.length, countries: changed.map(row => row.relationships.territory.data.id) };
+  // Enable France before disabling other countries; never alter pre-order settings.
+  changed.sort((a,b) => Number(b.relationships.territory.data.id === 'FRA') - Number(a.relationships.territory.data.id === 'FRA'));
+  for (const row of changed) {
+    await request(`territoryAvailabilities/${encodeURIComponent(row.id)}`, 'PATCH', {
+      type: 'territoryAvailabilities', id: row.id,
+      attributes: { available: row.relationships.territory.data.id === 'FRA' },
+    });
+  }
+  await assertFranceOnly(request);
+  return { mode: 'applied', changeCount: changed.length, active: ['FRA'] };
+}
+
 async function submitForReview(request, versionId) {
   const drafts = await request(`apps/${appId}/reviewSubmissions?filter%5Bstate%5D=READY_FOR_REVIEW&limit=50`);
   if (drafts.links?.next) throw new Error('Vérifie les brouillons App Review dans App Store Connect.');
@@ -174,12 +206,18 @@ export async function prepareVersion(request, { appVersion, buildNumber, submit 
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   try {
-    const message = await prepareVersion(apiClient(process.env), {
+    const request = apiClient(process.env);
+    if (process.argv.includes('--france-only')) {
+      const result = await restrictToFrance(request, { apply: process.argv.includes('--apply') });
+      console.log(JSON.stringify(result));
+    } else {
+    const message = await prepareVersion(request, {
       appVersion: process.env.APP_VERSION, buildNumber: process.env.BUILD_NUMBER,
       submit: process.env.SUBMIT_FOR_REVIEW === 'true',
     });
     if (process.env.GITHUB_STEP_SUMMARY) await appendFile(process.env.GITHUB_STEP_SUMMARY, `${message}\n`);
     console.log(message);
+    }
   } catch (error) {
     console.error(error.message);
     process.exitCode = 1;
