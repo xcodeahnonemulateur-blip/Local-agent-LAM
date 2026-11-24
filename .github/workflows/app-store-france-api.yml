@@ -1,0 +1,40 @@
+name: App Store France - Connexion API
+on:
+  push:
+    branches: ['work/france-release-3.1.1']
+    paths: ['.github/workflows/app-store-france-api.yml']
+  workflow_dispatch:
+    inputs:
+      apply_france_only:
+        description: 'Appliquer la restriction France uniquement (sinon aperçu)'
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: local-agent-llm-france-territories
+  cancel-in-progress: false
+jobs:
+  check:
+    if: github.ref == 'refs/heads/work/france-release-3.1.1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Vérifier la syntaxe du script
+        run: node --check .github/scripts/prepare-app-store.mjs
+      - name: Connexion Apple et aperçu des territoires
+        env:
+          ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          ASC_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+        run: node .github/scripts/prepare-app-store.mjs --france-only
+      - name: Appliquer explicitement la restriction France
+        if: github.event_name == 'workflow_dispatch' && inputs.apply_france_only
+        env:
+          ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          ASC_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+        run: node .github/scripts/prepare-app-store.mjs --france-only --apply
