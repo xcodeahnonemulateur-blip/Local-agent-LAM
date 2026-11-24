@@ -21,7 +21,7 @@ function apiClient({ ASC_KEY_ID: keyId, ASC_ISSUER_ID: issuer, ASC_KEY: secret }
   const token = `${payload}.${signature.toString('base64url')}`;
 
   return async function request(path, method = 'GET', data) {
-    const response = await fetch(`https://api.appstoreconnect.apple.com/v1/${path}`, {
+    const response = await fetch(`https://api.appstoreconnect.apple.com/${path.startsWith('v2/') ? path : `v1/${path}`}`, {
       method,
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: data === undefined ? undefined : JSON.stringify({ data }),
@@ -35,6 +35,27 @@ function apiClient({ ASC_KEY_ID: keyId, ASC_ISSUER_ID: issuer, ASC_KEY: secret }
     }
     return result;
   };
+}
+
+// Fail closed: no App Review submission unless the current App Store territory
+// configuration is France only. This does not change account settings or export compliance.
+export async function assertFranceOnly(request) {
+  const { data: availability } = await request(`apps/${appId}/appAvailabilityV2`);
+  if (!availability?.id || availability.attributes?.availableInNewTerritories !== false) {
+    throw new Error('Publication bloquée : désactive la disponibilité automatique dans les nouveaux territoires.');
+  }
+  const result = await request(`v2/appAvailabilities/${encodeURIComponent(availability.id)}/territoryAvailabilities?include=territory&limit=200`);
+  if (result.links?.next || !Array.isArray(result.data) || !result.data.length ||
+      result.data.some(item => typeof item.attributes?.available !== 'boolean' ||
+        item.relationships?.territory?.data?.type !== 'territories' ||
+        !item.relationships.territory.data.id)) {
+    throw new Error('Publication bloquée : la liste complète des territoires Apple ne peut pas être vérifiée.');
+  }
+  const active = result.data.filter(item => item.attributes.available)
+    .map(item => item.relationships.territory.data.id);
+  if (active.length !== 1 || active[0] !== 'FRA') {
+    throw new Error('Publication bloquée : sélectionne uniquement la France dans App Store Connect.');
+  }
 }
 
 async function submitForReview(request, versionId) {
@@ -96,6 +117,8 @@ export async function prepareVersion(request, { appVersion, buildNumber, submit 
     throw new Error(`Le build ${buildNumber} n’est pas disponible pour le test interne (${beta.internalBuildState}).`);
   }
 
+  if (submit) await assertFranceOnly(request);
+
   const versionsResponse = await request(`apps/${appId}/appStoreVersions?filter%5Bplatform%5D=IOS&limit=200`);
   if (versionsResponse.links?.next) throw new Error('La liste des versions Apple doit être vérifiée avant de préparer un brouillon.');
   const versions = versionsResponse.data.filter(entry => entry.attributes.platform === 'IOS');
@@ -142,6 +165,7 @@ export async function prepareVersion(request, { appVersion, buildNumber, submit 
     throw new Error('Apple n’a pas confirmé le brouillon, son build et son mode de publication.');
   }
   if (submit) {
+    await assertFranceOnly(request);
     const status = await submitForReview(request, version.id);
     return `App Review a reçu Local Agent LLM ${appVersion} (${buildNumber}). Statut : ${status}. Publication après approbation Apple.`;
   }
