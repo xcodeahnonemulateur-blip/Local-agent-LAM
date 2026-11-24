@@ -2,7 +2,7 @@ import { appendFile } from 'node:fs/promises';
 import { createPrivateKey, sign } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 
-const appId = '6836798813';
+let appId;
 const bundleId = 'com.localagentllm.apple';
 const betaReady = new Set(['READY_FOR_BETA_TESTING', 'IN_BETA_TESTING']);
 const editable = new Set(['PREPARE_FOR_SUBMISSION', 'DEVELOPER_REJECTED', 'REJECTED', 'METADATA_REJECTED', 'READY_FOR_REVIEW']);
@@ -31,15 +31,29 @@ function apiClient({ ASC_KEY_ID: keyId, ASC_ISSUER_ID: issuer, ASC_KEY: secret }
     const result = await response.json();
     if (!response.ok) {
       const codes = (result.errors ?? []).map(item => item.code).filter(Boolean).join(', ');
-      throw new Error(`App Store Connect a renvoyé HTTP ${response.status}${codes ? ` (${codes})` : ''}.`);
+      throw new Error(`App Store Connect : ${method} ${path.split('?')[0]} : HTTP ${response.status}${codes ? ` (${codes})` : ''}.`);
     }
     return result;
   };
 }
 
+// Resolve the resource ID from the exact bundle identifier instead of assuming it.
+async function resolveApp(request) {
+  const result = await request('apps?filter%5BbundleId%5D=' + encodeURIComponent(bundleId) + '&limit=10');
+  const apps = result.data;
+  if (result.links?.next || !Array.isArray(apps) || apps.length !== 1 ||
+      apps[0].attributes?.bundleId !== bundleId || !apps[0].id) {
+    throw new Error('Local Agent LLM introuvable ou ambigu avec cette clé Apple.');
+  }
+  appId = apps[0].id;
+  console.log('Application identifiée par son bundle ID.');
+  return appId;
+}
+
 // Fail closed: no App Review submission unless the current App Store territory
 // configuration is France only. This does not change account settings or export compliance.
 export async function assertFranceOnly(request) {
+  if (!appId) await resolveApp(request);
   const { data: availability } = await request(`apps/${appId}/appAvailabilityV2`);
   if (!availability?.id || availability.attributes?.availableInNewTerritories !== false) {
     throw new Error('Publication bloquée : désactive la disponibilité automatique dans les nouveaux territoires.');
@@ -60,6 +74,7 @@ export async function assertFranceOnly(request) {
 
 // Explicit territory-only operation, never submits a build or changes pricing.
 export async function restrictToFrance(request, { apply = false } = {}) {
+  await resolveApp(request);
   const app = (await request(`apps/${appId}`)).data;
   if (app?.attributes?.bundleId !== bundleId) throw new Error('Application Apple inattendue.');
   const availability = (await request(`apps/${appId}/appAvailabilityV2`)).data;
@@ -125,6 +140,7 @@ async function submitForReview(request, versionId) {
 }
 
 export async function prepareVersion(request, { appVersion, buildNumber, submit = false }) {
+  await resolveApp(request);
   if (!/^\d+\.\d+(?:\.\d+)?$/.test(appVersion ?? '') || !/^[1-9]\d*$/.test(buildNumber ?? '')) {
     throw new Error('Indique la version iOS et le numéro de build tels qu’ils apparaissent dans TestFlight.');
   }
