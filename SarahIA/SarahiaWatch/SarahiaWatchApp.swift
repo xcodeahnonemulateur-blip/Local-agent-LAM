@@ -1,5 +1,6 @@
 import SwiftUI
 import AVFoundation
+import QuartzCore
 import WatchConnectivity
 
 // Sarahia Watch 1.0.0 - SwiftUI companion, watchOS 10+.
@@ -143,10 +144,22 @@ private struct WatchListeningView: View {
                 Image(systemName: "waveform")
                     .foregroundStyle(WatchPalette.blue)
                     .font(.title2)
+                if link.isRecording {
+                    ProgressView(value: link.inputLevel)
+                        .tint(WatchPalette.violet)
+                        .accessibilityLabel("Niveau du microphone")
+                }
                 Text(link.message)
                     .font(.system(size: 11))
                     .multilineTextAlignment(.center)
                     .foregroundStyle(link.reachable ? Color.secondary : Color.orange)
+                if !link.recognizedText.isEmpty {
+                    Text(link.recognizedText)
+                        .font(.system(size: 11))
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2)
+                        .foregroundStyle(.secondary)
+                }
                 if mode == .translate, !link.frenchText.isEmpty {
                     Text(link.frenchText)
                         .font(.system(size: 13, weight: .medium))
@@ -241,13 +254,18 @@ private struct WatchAgentsView: View {
 final class SarahiaWatchLink: NSObject, ObservableObject, WCSessionDelegate {
     @Published private(set) var reachable = false
     @Published private(set) var isRecording = false
+    @Published private(set) var inputLevel = 0.0
     @Published var message = "Prêt à écouter"
+    @Published var recognizedText = ""
     @Published var frenchText = ""
 
     private let audioEngine = AVAudioEngine()
     private var audioConverter: AVAudioConverter?
     private let sendQueue = DispatchQueue(label: "sarahia.watch.audio", qos: .userInitiated)
     private var mode = "translate"
+    private var pendingStartMode: String?
+    private var isStarting = false
+    private var lastLevelUpdate = CACurrentMediaTime()
 
     override init() {
         super.init()
@@ -259,13 +277,52 @@ final class SarahiaWatchLink: NSObject, ObservableObject, WCSessionDelegate {
     }
 
     func start(mode: String) {
-        guard !isRecording else { return }
+        guard !isRecording, !isStarting else { return }
         self.mode = mode
+        recognizedText = ""
         frenchText = ""
-        guard WCSession.isSupported(), WCSession.default.isReachable else {
-            message = "Ouvre Sarahia sur l’iPhone et garde les deux apps ouvertes."
+        guard WCSession.isSupported() else {
+            message = "WatchConnectivity indisponible."
             return
         }
+        pendingStartMode = mode
+        attemptPendingStart()
+    }
+
+    private func attemptPendingStart() {
+        guard !isStarting, !isRecording, let mode = pendingStartMode else { return }
+        guard WCSession.default.activationState == .activated, WCSession.default.isReachable else {
+            message = "Connexion à Sarahia sur l’iPhone…"
+            return
+        }
+
+        isStarting = true
+        let audioSession = AVAudioSession.sharedInstance()
+        let permissionResponse: (Bool) -> Void = { [weak self] granted in
+            DispatchQueue.main.async {
+                guard let self = self, self.pendingStartMode != nil else { return }
+                guard granted else {
+                    self.isStarting = false
+                    self.pendingStartMode = nil
+                    self.message = "Autorise le microphone dans Réglages pour Sarahia sur la montre."
+                    return
+                }
+                self.startAudioCapture(mode: mode)
+            }
+        }
+        switch audioSession.recordPermission {
+        case .granted:
+            permissionResponse(true)
+        case .denied:
+            permissionResponse(false)
+        case .undetermined:
+            audioSession.requestRecordPermission(permissionResponse)
+        @unknown default:
+            permissionResponse(false)
+        }
+    }
+
+    private func startAudioCapture(mode: String) {
         do {
             let session = AVAudioSession.sharedInstance()
             try session.setCategory(.playAndRecord, mode: .default)
@@ -283,13 +340,15 @@ final class SarahiaWatchLink: NSObject, ObservableObject, WCSessionDelegate {
             }
             audioConverter = converter
             input.removeTap(onBus: 0)
-            input.installTap(onBus: 0, bufferSize: 4096, format: inputFormat) { [weak self] buffer, _ in
+            input.installTap(onBus: 0, bufferSize: 2048, format: inputFormat) { [weak self] buffer, _ in
                 self?.sendQueue.async { [weak self] in
                     self?.transmit(buffer, to: outputFormat)
                 }
             }
             audioEngine.prepare()
             try audioEngine.start()
+            pendingStartMode = nil
+            isStarting = false
             isRecording = true
             message = "Micro Apple Watch actif"
             WCSession.default.sendMessage(["type": "watch.start", "mode": mode],
@@ -298,7 +357,11 @@ final class SarahiaWatchLink: NSObject, ObservableObject, WCSessionDelegate {
                 DispatchQueue.main.async { self?.message = error.localizedDescription }
             })
         } catch {
-            stop()
+            pendingStartMode = nil
+            isStarting = false
+            if audioEngine.isRunning { audioEngine.stop() }
+            audioEngine.inputNode.removeTap(onBus: 0)
+            audioConverter = nil
             message = "Micro : \(error.localizedDescription)"
         }
     }
@@ -317,17 +380,37 @@ final class SarahiaWatchLink: NSObject, ObservableObject, WCSessionDelegate {
             inputStatus.pointee = .haveData
             return source
         }
-        guard result != .error, dest.frameLength > 0, let samples = dest.int16ChannelData?[0] else { return }
+        guard convertError == nil, result != .error, dest.frameLength > 0,
+              let samples = dest.int16ChannelData?[0] else { return }
+        let sampleCount = Int(dest.frameLength)
+        var sum: Double = 0
+        for index in 0..<sampleCount {
+            let sample = Double(samples[index]) / 32_768.0
+            sum += sample * sample
+        }
+        let now = CACurrentMediaTime()
+        if now - lastLevelUpdate >= 0.15 {
+            lastLevelUpdate = now
+            let level = min(1, sqrt(sum / Double(sampleCount)) * 10)
+            DispatchQueue.main.async { self.inputLevel = level }
+        }
         var packet = Data([0x53, 0x41, 0x52, 0x31]) // "SAR1"
-        packet.append(Data(bytes: samples, count: Int(dest.frameLength) * MemoryLayout<Int16>.size))
-        WCSession.default.sendMessageData(packet, replyHandler: nil, errorHandler: nil)
+        packet.append(Data(bytes: samples, count: sampleCount * MemoryLayout<Int16>.size))
+        WCSession.default.sendMessageData(packet, replyHandler: nil) { [weak self] error in
+            DispatchQueue.main.async {
+                self?.message = "Audio vers l’iPhone : \(error.localizedDescription)"
+            }
+        }
     }
 
     func stop() {
+        pendingStartMode = nil
+        isStarting = false
         if audioEngine.isRunning { audioEngine.stop() }
         audioEngine.inputNode.removeTap(onBus: 0)
         audioConverter = nil
         isRecording = false
+        inputLevel = 0
         try? AVAudioSession.sharedInstance().setActive(false)
         if WCSession.isSupported(), WCSession.default.isReachable {
             WCSession.default.sendMessage(["type": "watch.stop", "mode": mode],
@@ -340,6 +423,8 @@ final class SarahiaWatchLink: NSObject, ObservableObject, WCSessionDelegate {
                  error: Error?) {
         DispatchQueue.main.async {
             self.reachable = state == .activated && session.isReachable
+            if let error = error { self.message = "WatchConnectivity : \(error.localizedDescription)" }
+            self.attemptPendingStart()
         }
     }
 
@@ -350,6 +435,7 @@ final class SarahiaWatchLink: NSObject, ObservableObject, WCSessionDelegate {
                 self.stop()
                 self.message = "Liaison iPhone interrompue"
             }
+            self.attemptPendingStart()
         }
     }
 
@@ -361,6 +447,7 @@ final class SarahiaWatchLink: NSObject, ObservableObject, WCSessionDelegate {
             case "iphone.stop":
                 self.stop()
             case "phone.transcript":
+                self.recognizedText = message["he"] as? String ?? ""
                 self.frenchText = message["fr"] as? String ?? ""
             case "phone.status":
                 self.message = message["text"] as? String ?? ""

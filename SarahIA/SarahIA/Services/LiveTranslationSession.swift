@@ -207,8 +207,15 @@ public final class LiveTranslationSession: ObservableObject {
     // MARK: - Transcription
 
     private func upsert(_ item: LiveTranscriptItem) {
-        if microphoneSource == .watch && item.isFinal && item.isSpeech {
-            SarahWatchBridge.shared.sendTranscript(hebrew: item.originalText, french: item.translatedText)
+        if microphoneSource == .watch {
+            if item.isSpeech {
+                // Les segments partiels sont envoyés aussi : la montre montre la parole
+                // reconnue puis la traduction dès qu'elle est disponible.
+                let french = item.translatedText == "…" ? "" : item.translatedText
+                SarahWatchBridge.shared.sendTranscript(hebrew: item.originalText, french: french)
+            } else {
+                SarahWatchBridge.shared.sendStatus(item.originalText)
+            }
         }
         if let index = items.firstIndex(where: { $0.id == item.id }) {
             items[index] = item

@@ -82,6 +82,18 @@ final class SarahWatchBridge: NSObject, ObservableObject, WCSessionDelegate {
     }
 
     func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
+        handleMessage(message)
+    }
+
+    func session(_ session: WCSession, didReceiveMessage message: [String: Any],
+                 replyHandler: @escaping ([String: Any]) -> Void) {
+        if message["type"] as? String == "watch.start" {
+            replyHandler(["text": "iPhone connecté · traduction en préparation"])
+        }
+        handleMessage(message)
+    }
+
+    private func handleMessage(_ message: [String: Any]) {
         guard let type = message["type"] as? String else { return }
         DispatchQueue.main.async {
             switch type {
@@ -94,6 +106,7 @@ final class SarahWatchBridge: NSObject, ObservableObject, WCSessionDelegate {
                                                     targetLanguage: "fr",
                                                     isVoiceEnabled: true))
                 live.startFromWatch()
+                self.sendStatus("Micro Apple Watch connecté · parle en hébreu")
                 NotificationCenter.default.post(name: .sarahPresentLiveTranslation,
                                                 object: nil)
             case "watch.stop":
@@ -103,6 +116,12 @@ final class SarahWatchBridge: NSObject, ObservableObject, WCSessionDelegate {
             default: break
             }
         }
+    }
+
+    func sendStatus(_ text: String) {
+        guard WCSession.isSupported(), WCSession.default.isReachable else { return }
+        WCSession.default.sendMessage(["type": "phone.status", "text": text],
+                                      replyHandler: nil, errorHandler: nil)
     }
 
     func session(_ session: WCSession, didReceiveMessageData messageData: Data) {
