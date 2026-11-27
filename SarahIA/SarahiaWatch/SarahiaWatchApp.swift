@@ -1,6 +1,5 @@
 import SwiftUI
 import AVFoundation
-import QuartzCore
 import WatchConnectivity
 
 // Sarahia Watch 1.0.0 - SwiftUI companion, watchOS 10+.
@@ -265,7 +264,7 @@ final class SarahiaWatchLink: NSObject, ObservableObject, WCSessionDelegate {
     private var mode = "translate"
     private var pendingStartMode: String?
     private var isStarting = false
-    private var lastLevelUpdate = CACurrentMediaTime()
+    private var lastLevelUpdate = ProcessInfo.processInfo.systemUptime
 
     override init() {
         super.init()
@@ -388,7 +387,7 @@ final class SarahiaWatchLink: NSObject, ObservableObject, WCSessionDelegate {
             let sample = Double(samples[index]) / 32_768.0
             sum += sample * sample
         }
-        let now = CACurrentMediaTime()
+        let now = ProcessInfo.processInfo.systemUptime
         if now - lastLevelUpdate >= 0.15 {
             lastLevelUpdate = now
             let level = min(1, sqrt(sum / Double(sampleCount)) * 10)
