@@ -1,0 +1,4 @@
+    |                                   `- error: 'CACurrentMediaTime()' is unavailable in watchOS
+    |                   `- error: 'CACurrentMediaTime()' is unavailable in watchOS
+/Users/runner/work/Local-agent-LAM/Local-agent-LAM/SarahIA/SarahiaWatch/SarahiaWatchApp.swift:268:35: error: 'CACurrentMediaTime()' is unavailable in watchOS
+/Users/runner/work/Local-agent-LAM/Local-agent-LAM/SarahIA/SarahiaWatch/SarahiaWatchApp.swift:391:19: error: 'CACurrentMediaTime()' is unavailable in watchOS
