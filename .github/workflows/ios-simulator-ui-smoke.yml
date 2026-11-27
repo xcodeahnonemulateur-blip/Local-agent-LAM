@@ -210,7 +210,7 @@ jobs:
               run(['xcrun', 'simctl', 'boot', udid], timeout=40, check=False)
               run(['xcrun', 'simctl', 'bootstatus', udid, '-b'], timeout=240)
               run(['xcrun', 'simctl', 'install', udid, os.environ['APP_PATH']], timeout=240)
-              launched = run(['xcrun', 'simctl', 'launch', udid, 'com.sarahia.app'], timeout=150)
+              launched = run(['xcrun', 'simctl', 'launch', udid, 'com.localagentllm.apple'], timeout=150)
               print(launched.stdout.strip(), flush=True)
               time.sleep(4)
           except Exception:
