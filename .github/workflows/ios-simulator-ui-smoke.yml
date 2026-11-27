@@ -124,6 +124,22 @@ jobs:
           }
           SWIFT
 
+      - name: Remove native inference links from simulator-only build
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          project = Path('SarahIA/SarahIA.xcodeproj/project.pbxproj')
+          source = project.read_text()
+          updated, whisper_count = re.subn(r'\s*"-framework",\s*whisper,', '', source)
+          updated, llama_count = re.subn(r'\s*"-framework",\s*llama,', '', updated)
+          if whisper_count != 2 or llama_count != 2:
+              raise SystemExit(f'Expected two simulator link entries; found whisper={whisper_count}, llama={llama_count}')
+          project.write_text(updated)
+          print('Removed only native whisper/llama linker entries from this simulator smoke checkout')
+          PY
+
       - name: Build SarahIA for iOS Simulator
         run: |
           set -euo pipefail
@@ -255,3 +271,4 @@ jobs:
             xcrun simctl shutdown "$SIM_UDID" || true
             xcrun simctl delete "$SIM_UDID" || true
           fi
+
