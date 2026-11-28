@@ -105,13 +105,17 @@ jobs:
           runtimes = [r for r in runtimes if "iOS" in r.get("identifier","") and r.get("isAvailable",True)]
           if not runtimes: raise SystemExit("No iOS simulator runtime available")
           runtime = sorted(runtimes, key=lambda r: tuple(map(int,re.findall(r"\d+",r.get("version",""))[:3])), reverse=True)[0]["identifier"]
+          created = []
           for major, device in selected.items():
               udid = subprocess.check_output(["xcrun","simctl","create",f"LAM-iPhone-{major}-{os.environ['GITHUB_RUN_ID']}",device["identifier"],runtime],text=True).strip()
               with open(os.environ["GITHUB_ENV"],"a") as env: env.write(f"SIM_{major}={udid}\n")
+              created.append({"major": major, "udid": udid})
               print(f"Created {device['name']}: {udid}")
+          with open(os.path.join(os.environ["RUNNER_TEMP"], "simulators.json"), "w") as state:
+              json.dump(created, state)
           PY
           python3 - <<'PY'
-          import os, subprocess, time
+          import json, os, subprocess, time
 
           def simctl(*args, timeout=300):
               command = ["xcrun", "simctl", *args]
@@ -123,7 +127,8 @@ jobs:
               if result.returncode:
                   raise SystemExit(result.returncode)
 
-          devices = [(major, os.environ[f"SIM_{major}"]) for major in ("18", "16", "14")]
+          with open(os.path.join(os.environ["RUNNER_TEMP"], "simulators.json")) as state:
+              devices = [(item["major"], item["udid"]) for item in json.load(state)]
           for major, udid in devices:
               simctl("boot", udid, timeout=120)
               simctl("bootstatus", udid, "-b", timeout=300)
