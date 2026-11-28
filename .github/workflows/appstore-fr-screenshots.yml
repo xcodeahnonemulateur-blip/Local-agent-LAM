@@ -14,7 +14,7 @@ permissions:
 
 concurrency:
   group: appstore-fr-screenshots
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   capture:
