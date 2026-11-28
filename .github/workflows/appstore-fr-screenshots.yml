@@ -1,0 +1,199 @@
+name: App Store France — iPhone screenshots
+
+on:
+  workflow_dispatch:
+    inputs:
+      upload_to_app_store:
+        description: Upload the French screenshots to App Store Connect (no review submission)
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: appstore-fr-screenshots
+  cancel-in-progress: false
+
+jobs:
+  capture:
+    runs-on: xcode-27
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore generated source bridge
+        run: python3 .github/scripts/restore_website_voice_bridge.py
+
+      - name: Prepare simulator-only build
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > SarahIA/SarahIA/Services/WhisperService.swift <<'SWIFT'
+          import Foundation
+          import AVFoundation
+          import Combine
+          @available(iOS 13.0, *)
+          public final class WhisperService: ObservableObject {
+              public static let shared = WhisperService()
+              @Published public private(set) var isRecording = false
+              @Published public private(set) var isTranscribing = false
+              @Published public private(set) var currentText = ""
+              @Published public private(set) var micEnergyLevel: Float = 0
+              @Published public private(set) var isModelReady = true
+              @Published public private(set) var isModelLoading = false
+              @Published public private(set) var lastError: String? = nil
+              public var onPartialTranscription: ((String) -> Void)?
+              public var onFinalTranscription: ((String) -> Void)?
+              public var onVoiceActivity: (() -> Void)?
+              private init() {}
+              public func prepareModel() {}
+              public func requestAuthorization(completion: @escaping (Bool) -> Void) { completion(true) }
+              public func startRecording(autoFinalizeOnSilence: Bool = true) { isRecording = true }
+              public func stopRecordingAndTranscribe(completion: ((String?) -> Void)? = nil) {
+                  isRecording = false; completion?(currentText.isEmpty ? nil : currentText)
+              }
+              public func stopRecordingWithoutTranscription() { isRecording = false }
+              public func startTranscription() { startRecording() }
+              public func stopTranscription() { stopRecordingAndTranscribe() }
+              public func appendAudioBuffer(_ buffer: AVAudioPCMBuffer) {}
+              public func reset() { isRecording = false; isTranscribing = false; currentText = "" }
+          }
+          SWIFT
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          path = Path("SarahIA/SarahIA.xcodeproj/project.pbxproj")
+          text = path.read_text()
+          text, whisper = re.subn(r'\s*"-framework",\s*whisper,', '', text)
+          text, llama = re.subn(r'\s*"-framework",\s*llama,', '', text)
+          if whisper != 2 or llama != 2:
+              raise SystemExit(f"Expected 2 simulator linker entries each; got whisper={whisper}, llama={llama}")
+          path.write_text(text)
+          PY
+
+      - name: Build once for iOS Simulator
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild -project SarahIA/SarahIA.xcodeproj -scheme SarahIA -configuration Debug \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$RUNNER_TEMP/DerivedData" CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO COMPILER_INDEX_STORE_ENABLE=NO \
+            SWIFT_TREAT_WARNINGS_AS_ERRORS=NO build | tee "$RUNNER_TEMP/simulator-build.log"
+          APP_PATH="$(find "$RUNNER_TEMP/DerivedData" -name SarahIA.app -type d -print -quit)"
+          test -n "$APP_PATH"
+          echo "APP_PATH=$APP_PATH" >> "$GITHUB_ENV"
+
+      - name: Boot three simulators and capture screenshots
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p appstore-screenshots/fr-FR
+          python3 - <<'PY'
+          import json, os, re, subprocess
+          devices = json.loads(subprocess.check_output(["xcrun","simctl","list","devicetypes","--json"]))["devicetypes"]
+          selected = {}
+          for major in ("18","16","14"):
+              choices = [d for d in devices if re.match(rf"^iPhone {major}(?:\D|$)", d["name"])]
+              if not choices: raise SystemExit(f"No iPhone {major} simulator type available")
+              choices.sort(key=lambda d: (d["name"] != f"iPhone {major}", d["name"]))
+              selected[major] = choices[0]
+          runtimes = json.loads(subprocess.check_output(["xcrun","simctl","list","runtimes","--json"]))["runtimes"]
+          runtimes = [r for r in runtimes if "iOS" in r.get("identifier","") and r.get("isAvailable",True)]
+          if not runtimes: raise SystemExit("No iOS simulator runtime available")
+          runtime = sorted(runtimes, key=lambda r: tuple(map(int,re.findall(r"\d+",r.get("version",""))[:3])), reverse=True)[0]["identifier"]
+          for major, device in selected.items():
+              udid = subprocess.check_output(["xcrun","simctl","create",f"LAM-iPhone-{major}-{os.environ['GITHUB_RUN_ID']}",device["identifier"],runtime],text=True).strip()
+              with open(os.environ["GITHUB_ENV"],"a") as env: env.write(f"SIM_{major}={udid}\n")
+              print(f"Created {device['name']}: {udid}")
+          PY
+          for UDID in "$SIM_18" "$SIM_16" "$SIM_14"; do xcrun simctl boot "$UDID" & done
+          wait
+          for UDID in "$SIM_18" "$SIM_16" "$SIM_14"; do xcrun simctl bootstatus "$UDID" -b & done
+          wait
+          for MAJOR in 18 16 14; do
+            VAR="SIM_$MAJOR"; UDID="${!VAR}"
+            xcrun simctl status_bar "$UDID" override --time 9:41 --dataNetwork wifi --wifiMode active --wifiBars 3 --cellularMode active --cellularBars 4 --batteryState charged --batteryLevel 100
+            xcrun simctl install "$UDID" "$APP_PATH"
+            xcrun simctl launch "$UDID" com.localagentllm.apple
+          done
+          sleep 12
+          for MAJOR in 18 16 14; do
+            VAR="SIM_$MAJOR"; UDID="${!VAR}"
+            xcrun simctl io "$UDID" screenshot "appstore-screenshots/fr-FR/LocalAgentLAM-iPhone-$MAJOR.png"
+          done
+
+      - name: Keep screenshots as an artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Local-Agent-LAM-App-Store-France-iPhone
+          path: appstore-screenshots/
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Remove temporary simulators
+        if: always()
+        shell: bash
+        run: |
+          for UDID in "${SIM_18:-}" "${SIM_16:-}" "${SIM_14:-}"; do
+            [ -z "$UDID" ] || { xcrun simctl shutdown "$UDID" || true; xcrun simctl delete "$UDID" || true; }
+          done
+
+  upload-to-app-store-connect:
+    needs: capture
+    if: inputs.upload_to_app_store
+    runs-on: macos-latest
+    timeout-minutes: 30
+    env:
+      APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+      APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+      APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: Local-Agent-LAM-App-Store-France-iPhone
+          path: appstore-screenshots
+
+      - name: Check App Store Connect key
+        shell: bash
+        run: |
+          set -euo pipefail
+          for NAME in APP_STORE_CONNECT_KEY_ID APP_STORE_CONNECT_ISSUER_ID APP_STORE_CONNECT_PRIVATE_KEY; do
+            [ -n "$(printenv "$NAME")" ] || { echo "::error::Missing GitHub secret $NAME"; exit 1; }
+          done
+
+      - name: Install Fastlane
+        run: gem install fastlane --no-document
+
+      - name: Create temporary API key file
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import base64, json, os, pathlib
+          key = os.environ["APP_STORE_CONNECT_PRIVATE_KEY"]
+          if "BEGIN PRIVATE KEY" not in key: key = base64.b64decode(key).decode("utf-8")
+          root = pathlib.Path(os.environ["RUNNER_TEMP"])
+          (root / "asc-api-key.json").write_text(json.dumps({
+              "key_id": os.environ["APP_STORE_CONNECT_KEY_ID"],
+              "issuer_id": os.environ["APP_STORE_CONNECT_ISSUER_ID"],
+              "key": key, "in_house": False
+          }))
+          PY
+
+      - name: Upload screenshots to French version 3.1.0 only
+        env:
+          ASC_KEY_PATH: ${{ runner.temp }}/asc-api-key.json
+        run: |
+          set -euo pipefail
+          fastlane deliver \
+            --api_key_path "$ASC_KEY_PATH" \
+            --app_identifier com.localagentllm.apple \
+            --app_version 3.1.0 --platform ios \
+            --screenshots_path appstore-screenshots \
+            --skip_metadata true --skip_binary_upload true \
+            --skip_app_version_update true --submit_for_review false \
+            --overwrite_screenshots false --force true
+
