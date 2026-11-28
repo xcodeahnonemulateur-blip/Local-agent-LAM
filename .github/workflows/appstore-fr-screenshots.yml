@@ -106,27 +106,38 @@ jobs:
           runtime = sorted(runtimes, key=lambda r: tuple(map(int,re.findall(r"\d+",r.get("version",""))[:3])), reverse=True)[0]["identifier"]
           for major, device in selected.items():
               udid = subprocess.check_output(["xcrun","simctl","create",f"LAM-iPhone-{major}-{os.environ['GITHUB_RUN_ID']}",device["identifier"],runtime],text=True).strip()
-              line = f"SIM_{major}={udid}\n"
-              with open(os.environ["GITHUB_ENV"],"a") as env: env.write(line)
-              with open(os.path.join(os.environ["RUNNER_TEMP"], "simulator-ids.env"),"a") as env: env.write(line)
+              with open(os.environ["GITHUB_ENV"],"a") as env: env.write(f"SIM_{major}={udid}\n")
               print(f"Created {device['name']}: {udid}")
           PY
-          source "$RUNNER_TEMP/simulator-ids.env"
-          for UDID in "$SIM_18" "$SIM_16" "$SIM_14"; do xcrun simctl boot "$UDID" & done
-          wait
-          for UDID in "$SIM_18" "$SIM_16" "$SIM_14"; do xcrun simctl bootstatus "$UDID" -b & done
-          wait
-          for MAJOR in 18 16 14; do
-            VAR="SIM_$MAJOR"; UDID="${!VAR}"
-            xcrun simctl status_bar "$UDID" override --time 9:41 --dataNetwork wifi --wifiMode active --wifiBars 3 --cellularMode active --cellularBars 4 --batteryState charged --batteryLevel 100
-            xcrun simctl install "$UDID" "$APP_PATH"
-            xcrun simctl launch "$UDID" com.localagentllm.apple
-          done
-          sleep 12
-          for MAJOR in 18 16 14; do
-            VAR="SIM_$MAJOR"; UDID="${!VAR}"
-            xcrun simctl io "$UDID" screenshot "appstore-screenshots/fr-FR/LocalAgentLAM-iPhone-$MAJOR.png"
-          done
+          python3 - <<'PY'
+          import os, subprocess, time
+
+          def simctl(*args, timeout=300):
+              command = ["xcrun", "simctl", *args]
+              print("+", " ".join(command), flush=True)
+              result = subprocess.run(command, text=True, stdout=subprocess.PIPE,
+                                      stderr=subprocess.STDOUT, timeout=timeout)
+              if result.stdout:
+                  print(result.stdout, end="", flush=True)
+              if result.returncode:
+                  raise SystemExit(result.returncode)
+
+          devices = [(major, os.environ[f"SIM_{major}"]) for major in ("18", "16", "14")]
+          for major, udid in devices:
+              simctl("boot", udid, timeout=120)
+              simctl("bootstatus", udid, "-b", timeout=300)
+              simctl("status_bar", udid, "override", "--time", "9:41", "--dataNetwork", "wifi",
+                     "--wifiMode", "active", "--wifiBars", "3", "--cellularMode", "active",
+                     "--cellularBars", "4", "--batteryState", "charged", "--batteryLevel", "100", timeout=60)
+              simctl("install", udid, os.environ["APP_PATH"], timeout=240)
+              simctl("launch", udid, "com.localagentllm.apple", timeout=120)
+
+          # Keep the three requested device sizes booted together for the capture.
+          time.sleep(12)
+          for major, udid in devices:
+              simctl("io", udid, "screenshot",
+                    f"appstore-screenshots/fr-FR/LocalAgentLAM-iPhone-{major}.png", timeout=60)
+          PY
 
       - name: Keep screenshots as an artifact
         if: always()
