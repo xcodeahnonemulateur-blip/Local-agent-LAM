@@ -95,10 +95,11 @@ jobs:
           import json, os, re, subprocess
           devices = json.loads(subprocess.check_output(["xcrun","simctl","list","devicetypes","--json"]))["devicetypes"]
           selected = {}
+          preferred = {"18": "iPhone 18 Pro", "16": "iPhone 16", "14": "iPhone 14 Pro"}
           for major in ("18","16","14"):
               choices = [d for d in devices if re.match(rf"^iPhone {major}(?:\D|$)", d["name"])]
               if not choices: raise SystemExit(f"No iPhone {major} simulator type available")
-              choices.sort(key=lambda d: (d["name"] != f"iPhone {major}", d["name"]))
+              choices.sort(key=lambda d: (d["name"] != preferred[major], d["name"]))
               selected[major] = choices[0]
           runtimes = json.loads(subprocess.check_output(["xcrun","simctl","list","runtimes","--json"]))["runtimes"]
           runtimes = [r for r in runtimes if "iOS" in r.get("identifier","") and r.get("isAvailable",True)]
